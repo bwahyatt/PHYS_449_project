@@ -15,3 +15,5 @@ To run this script, enter the following into the command line:
 ```{cmd}
 python image_visualizer.py data/even_mnist.csv
 ```
+
+Testing (Ben)
