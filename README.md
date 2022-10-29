@@ -28,5 +28,5 @@ python image_visualizer.py data/even_mnist.csv
 - pytorch
 - numpy
 - opencv
-- scikit.learn
+- scikit-learn
 
