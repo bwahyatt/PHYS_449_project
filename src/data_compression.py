@@ -35,7 +35,7 @@ def mean_image_vec(path_to_images):
 
     ## just the 1D size of the processed images
     img_size = np.size(np.array(dummy_img).flatten())
-    mean_img = np.zeros(img_size,int)
+    mean_img = np.zeros(img_size,float)
 
     for img_name in all_imgs_list:
         full_fname = path_to_images+'/'+img_name
