@@ -22,6 +22,7 @@ def flattener(path_to_image):
     
     return img_array_flat
 
+## this function should only need to get called once
 def mean_image_vec(path_to_images):
     ## find the mean flattened vector of all the images
     ## argument should be the directory with all of the processed, binary images
