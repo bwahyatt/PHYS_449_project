@@ -79,4 +79,7 @@ def big_cov_matrix(mean_img,path_to_images):
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-    
+
+## STILL NEED:
+    ## PCA on the big cov matrix above (i.e. get set of eigenvectors ranked by eigenvalues)
+    ## feature extraction (projecting theta vectors onto the^ principle components of C)
