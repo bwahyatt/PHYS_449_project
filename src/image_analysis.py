@@ -74,7 +74,7 @@ def small_cov_matrix(bin_img_array, centre_i, centre_j):
     m = np.size(bin_img_array[:,0]) ## number of rows
     n = np.size(bin_img_array[0,:]) ## number of columns 
     
-     for i in range(m):
+    for i in range(m):
         for j in range(n):
             C_matrix[0,0] += bin_img_array[i,j]*((i-centre_i)**2)
             C_matrix[0,1] += bin_img_array[i,j]*(i-centre_i)*(j-centre_j)

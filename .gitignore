@@ -1,6 +1,8 @@
 # Folders
 *env/
+*__pycache__/
 
 # File Extensions
 *.code-workspace
 
+# Files
