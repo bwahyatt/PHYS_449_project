@@ -15,7 +15,7 @@ I.e. the authors use multiple numbers of classification outputs. Keep the "full"
 
 ## Project Dependencies
 
-## Python
+### Python
 
 We are using Python 3.10.5
 
