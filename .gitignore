@@ -6,3 +6,4 @@
 *.code-workspace
 
 # Files
+*launch.json

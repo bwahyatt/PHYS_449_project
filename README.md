@@ -13,7 +13,11 @@ Our dataset should have a folder with all the images, and a txt/csv file with th
 
 I.e. the authors use multiple numbers of classification outputs. Keep the "full" morphology output so we can go back and decide which/how many classifications we want for the other rows
 
-## Packages and other project dependencies
+## Project Dependencies
+
+## Python
+
+We are using Python 3.10.5
 
 ### Create a new venv (virtual environment)
 
