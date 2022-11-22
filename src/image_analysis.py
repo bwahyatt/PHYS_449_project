@@ -37,9 +37,10 @@ def binary_assign(path_to_img, threshold, output_path):
     # Multiply the array by 255 because cv2.imwrite takes the array values as colour values
     # And we want the pixels above the threshold to appear white
     im_array = 255*bin_image
+
     cv2.imwrite(output_path, im_array)
     ## this^ intermediate, unrotated binary image will need to be used later in "rotator" function, see below
-    
+
     ## return the np array
     # returning the array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
     return bin_image
@@ -131,11 +132,12 @@ def theta_angle(cov_matrix):
         ## authors are somewhat ambiguous on how they did it..
     ## something that saves np array as an image file
 
+
 ## This could work for rotation:
 ## https://pyimagesearch.com/2021/01/20/opencv-rotate-image/
 ## https://www.geeksforgeeks.org/python-opencv-getrotationmatrix2d-function/
 
-    
+
 
 
 ## Keeping the stuff using cv2.threshold down here

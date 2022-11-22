@@ -17,6 +17,7 @@ from image_analysis import binary_assign, centre_row_col, small_cov_matrix, thet
     ## see "raw_images"
 ## might want another script that saves images to a folder, e.g. with that sdss package
     ## see "dataset_generate.py"
+
 ## we should make a separate folder with all of the processed, binary images too (see below)
 
 binary_threshold = 123 ## some number for assigning binary image pixel values

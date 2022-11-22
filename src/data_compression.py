@@ -41,7 +41,7 @@ def mean_image_vec(path_to_images):
 
     for img_name in all_imgs_list:
         full_fname = path_to_images+'/'+img_name
-        mean_img += flattener(full_name)
+        mean_img += flattener(full_fname)
 
     mean_img /= len(all_imgs_list)
     ## careful, "ints" are going to be rounded off.. and everything is 0 or 1
