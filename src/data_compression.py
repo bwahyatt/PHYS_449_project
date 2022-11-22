@@ -67,23 +67,19 @@ def mean_image_vec(path_to_images: str) -> NDArray:
     ## the average flattened image vector of the whole processed dataset:
     return mean_img 
 
-
-
-def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
+def matrix_of_thetas(mean_img: NDArray, path_to_images: str) -> NDArray:
     '''
-    Create the big covariance matrix for the whole processed dataset
-        - See eq'n 8 of the paper
-    NOTE: This function should also only need to get called once
-    
+    Computes how each image differs from the mean image and puts those values together in a matrix
+
     Args:
         mean_img (NDArray): The output of the "mean_image_vec" function
             i.e. the average flattened image vector of the whole dataset
         path_to_images (str): The folder/directory with all of the processed images
 
     Returns:
-        NDArray: The covariance matrix
+        NDArray: The matrix of thetas
     '''
-
+    
     ## list of all the processed image names, like the above function
     all_imgs_list = os.listdir(path_to_images)
 
@@ -100,7 +96,42 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
 
         ## might end up needing some "theta_m transpose" on RHS instead? (probably not) 
         A_matrix[:,m] += theta_m
+        
+    return A_matrix
 
+def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
+    '''
+    Create the big covariance matrix for the whole processed dataset
+        - See eq'n 8 of the paper
+    NOTE: This function should also only need to get called once
+    
+    Args:
+        mean_img (NDArray): The output of the "mean_image_vec" function
+            i.e. the average flattened image vector of the whole dataset
+        path_to_images (str): The folder/directory with all of the processed images
+
+    Returns:
+        NDArray: The covariance matrix
+    '''
+
+    # ## list of all the processed image names, like the above function
+    # all_imgs_list = os.listdir(path_to_images)
+
+    # ## this matrix has columns that are "theta" vectors
+    #     ## num rows = size of these flattened image vectors
+    #     ## num columns = number of images in dataset
+    # ## dtype also float? 
+    # A_matrix = np.zeros((np.size(mean_img),len(all_imgs_list)),float)
+
+    # for m in range(len(all_imgs_list)):
+    #     ## path to individual (processed) image file
+    #     mth_img_path = path_to_images+'/'+all_imgs_list[m]         
+    #     theta_m = flattener(mth_img_path) - mean_img
+
+    #     ## might end up needing some "theta_m transpose" on RHS instead? (probably not) 
+    #     A_matrix[:,m] += theta_m
+
+    A_matrix = matrix_of_thetas(mean_img, path_to_images)
     A_T = np.transpose(A_matrix)
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
