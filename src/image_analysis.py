@@ -207,14 +207,10 @@ def rotate(image: NDArray, angle: float) -> NDArray:
     return output
 
 ## STILL NEEDED:
-    ## an actual image rotater (by the angle theta, obtained above) 
     ## something that re-scales the images/gets rid of background columns
         ## authors are somewhat ambiguous on how they did it..
-    ## something that saves np array as an image file
-
-## This could work for rotation:
-## https://pyimagesearch.com/2021/01/20/opencv-rotate-image/
-## https://www.geeksforgeeks.org/python-opencv-getrotationmatrix2d-function/
+    ## something that saves final np array as an image file
+       ## this can just be done in "image_processer_script.py" loop
 
 
 # if __name__ == '__main__':

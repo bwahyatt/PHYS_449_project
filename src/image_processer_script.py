@@ -10,7 +10,7 @@ import os
 
 # sys.path.append('src')
 
-from image_analysis import binary_assign, centre_row_col, small_cov_matrix, theta_angle
+from image_analysis import binary_assign, centre_row_col, small_cov_matrix, theta_angle, rotate
 
 ## DATASET STUFF...
 ## we should have some folder like "dataset" with all of our raw images in it 
@@ -35,7 +35,8 @@ for n in range(len(raw_img_names)):
     binary_image_array = binary_assign(PATH_TO_RAW_IMAGES+raw_img_names[n], binary_threshold)
     i_bar, j_bar = centre_row_col(binary_image_array)
     C_2x2 = small_cov_matrix(binary_image_array, i_bar, j_bar)
-    theta_rotate = theta_angle(C_2x2)
+    theta_rotate_angle = theta_angle(C_2x2)
+    rotated_image_array = rotate(binary_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
     
     ## rotate, rescale, save array as a processed image to new folder
     
