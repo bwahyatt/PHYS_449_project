@@ -14,21 +14,25 @@ from image_analysis import binary_assign, centre_row_col, small_cov_matrix, thet
 
 ## DATASET STUFF...
 ## we should have some folder like "dataset" with all of our raw images in it 
+    ## see "raw_images"
 ## might want another script that saves images to a folder, e.g. with that sdss package
-## or, we save the images ourselves
+    ## see "dataset_generate.py"
+
 ## we should make a separate folder with all of the processed, binary images too (see below)
 
 binary_threshold = 123 ## some number for assigning binary image pixel values
                        ## could also be included in some hyperparameter dictionary like the assignments, or command line argument?
                        ## or obtained some other clever way (automation, etc)
+                         ## potentially: opencv tools (see "image_analysis.py", last few lines) 
         
-PATH_TO_RAW_IMAGES = "./TBD" ## ./ might be unneccesary
-PATH_TO_PROCESSED_IMAGES = "./TBD2"
         
-raw_img_names = os.listdir(PATH_TO_RAW_IMAGES) ## list of the file names
+PATH_TO_RAW_IMAGES = "../raw_images/"    ## relative should work if this script is in 'src'
+PATH_TO_PROCESSED_IMAGES = "../processed_images/"    ## "  "  "  "  "  "
+        
+raw_img_names = os.listdir(PATH_TO_RAW_IMAGES) ## list of the raw image file names
 
 for n in range(len(raw_img_names)):
-    binary_image_array = binary_assign(PATH_TO_RAW_IMAGES+"/"+raw_img_names[n], binary_threshold)
+    binary_image_array = binary_assign(PATH_TO_RAW_IMAGES+raw_img_names[n], binary_threshold)
     i_bar, j_bar = centre_row_col(binary_image_array)
     C_2x2 = small_cov_matrix(binary_image_array, i_bar, j_bar)
     theta_rotate = theta_angle(C_2x2)
