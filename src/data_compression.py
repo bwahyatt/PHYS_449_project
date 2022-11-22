@@ -2,10 +2,18 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from nptyping import NDArray
 
-def flattener(path_to_image):
-    ## obtains flattened image vector
-    ## of (processed) galaxy image
+def flattener(path_to_image: str) -> NDArray:
+    '''
+    Obtains the flattened image vector of the (processed) galaxy image
+
+    Args:
+        path_to_image (str): The filepath str to the image to flatten
+
+    Returns:
+        NDArray: The flatten image array
+    '''
 
     img_input = cv2.imread(path_to_image, 0)
         ## the 0 argument reads the image as black and white
@@ -23,11 +31,19 @@ def flattener(path_to_image):
 
     return img_array_flat
 
-## this function should only need to get called once
-## find the mean flattened vector of all the images
-def mean_image_vec(path_to_images):
-    ## argument should be the directory with all of the processed, binary images
-        ## i.e. let's keep all these in their own folder
+
+def mean_image_vec(path_to_images: str) -> NDArray:
+    '''
+    Find the mean flattened vector of all the images
+    NOTE: This function should only need to get called once!
+    
+    Args:
+        path_to_images (str): The directory with all of the processed, binary images.
+            i.e. let's keep all these in their own folder
+
+    Returns:
+        NDArray: The average flattened image vector of the whole processed dataset
+    '''
 
     all_imgs_list = os.listdir(path_to_images)
 
@@ -50,13 +66,22 @@ def mean_image_vec(path_to_images):
     ## the average flattened image vector of the whole processed dataset:
     return mean_img 
 
-## this function should also only need to get called once
-## create the big covariance matrix for the whole processed dataset
-    ## see eq'n 8 of the paper
-def big_cov_matrix(mean_img,path_to_images):
-    ## mean_img should be the output of the "mean_image_vec" function
-        ## i.e. the average flattened image vector of the whole dataset
-    ## path_to_images should be the folder/directory with all of the processed images
+
+
+def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
+    '''
+    Create the big covariance matrix for the whole processed dataset
+        - See eq'n 8 of the paper
+    NOTE: This function should also only need to get called once
+    
+    Args:
+        mean_img (NDArray): The output of the "mean_image_vec" function
+            i.e. the average flattened image vector of the whole dataset
+        path_to_images (str): The folder/directory with all of the processed images
+
+    Returns:
+        NDArray: The covariance matrix
+    '''
 
     ## list of all the processed image names, like the above function
     all_imgs_list = os.listdir(path_to_images)
