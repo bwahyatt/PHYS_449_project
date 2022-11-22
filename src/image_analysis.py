@@ -1,13 +1,16 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import os
+import math
 
 ## produce a binary image of a "raw" image from the dataset
-def binary_assign(path_to_img, threshold):
+def binary_assign(path_to_img, threshold, output_path):
     ## path_to_img is the folder/file/pathway of the "raw" dataset image
-    ## threshold is the lower boundary cut off value for assigning a 1 or 0 
+    ## threshold is the lower boundary cut off value for assigning a 1 or 0 (choose a number between 0 and 255)
         ## a hyperparameter? Or is there a more systematic way of obtaining it?
+    ## output_path is the filepath of where we want to save the image to
         
         #### AT SOME POINT:
         ## we may want to also introduce an upper limit threshold value e.g. for bright foreground stars contaminating images
@@ -31,8 +34,14 @@ def binary_assign(path_to_img, threshold):
         for j in range(n):
             if img_array[i,j] > threshold:
                 bin_image[i,j] += 1
-                
+    # Multiply the array by 255 because cv2.imwrite takes the array values as colour values
+    # And we want the pixels above the threshold to appear white
+    im_array = 255*bin_image
+    cv2.imwrite(output_path, im_array)
+    ## this^ intermediate, unrotated binary image will need to be used later in "rotator" function, see below
+    
     ## return the np array
+    # returning the array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
     return bin_image
     
 ## get the centre row and centre column of a galaxy WITHIN its image
@@ -74,7 +83,7 @@ def small_cov_matrix(bin_img_array, centre_i, centre_j):
     m = np.size(bin_img_array[:,0]) ## number of rows
     n = np.size(bin_img_array[0,:]) ## number of columns 
     
-     for i in range(m):
+    for i in range(m):
         for j in range(n):
             C_matrix[0,0] += bin_img_array[i,j]*((i-centre_i)**2)
             C_matrix[0,1] += bin_img_array[i,j]*(i-centre_i)*(j-centre_j)
@@ -113,15 +122,35 @@ def theta_angle(cov_matrix):
     ## also: below I am using arctan2 (which returns an angle from -pi to pi rather than -pi/2 to pi/2, like typical arctan)
         ## I believe (?) this is the correct choice
         
-    theta = np.arctan2(PC1[1],PC1[0]) ## again, might need to swap those two arguments later
-    return theta
+    theta = np.arctan2(PC1[1],PC1[0])  ## again, might need to swap those two arguments later
+    return theta                       ## again, this is in radians, from -pi to pi
 
 ## STILL NEEDED:
     ## an actual image rotater (by the angle theta, obtained above) 
     ## something that re-scales the images/gets rid of background columns
         ## authors are somewhat ambiguous on how they did it..
     ## something that saves np array as an image file
-        
+
+## This could work for rotation:
+## https://pyimagesearch.com/2021/01/20/opencv-rotate-image/
+## https://www.geeksforgeeks.org/python-opencv-getrotationmatrix2d-function/
 
     
+
+
+## Keeping the stuff using cv2.threshold down here
+## In case we want to replace something in the current binary_assign function with it
+## Otherwise we can delete it
+
+
+# gal = cv2.imread('../raw_images/1237661949186474088.jpg',0) #Import a raw image as greyscale
+
+# # converting to its binary form
+# (thresh,binary_array) = cv2.threshold(gal, 90, 255, cv2.THRESH_BINARY)
+
+# cv2.imwrite('./test_binary_image.jpg', binary_array)
+# print(binary_array)
+
+binary_assign('../raw_images/1237651753493266487.jpg', 100, '../data//test_binary.jpg') #Creating a test image
+
     
