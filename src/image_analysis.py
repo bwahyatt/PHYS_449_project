@@ -4,72 +4,88 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
 import math
+from scipy import ndimage, misc
 
 ## produce a binary image of a "raw" image from the dataset
-def binary_assign(path_to_img, threshold, output_path):
-    ## path_to_img is the folder/file/pathway of the "raw" dataset image
-    ## threshold is the lower boundary cut off value for assigning a 1 or 0 (choose a number between 0 and 255)
-        ## a hyperparameter? Or is there a more systematic way of obtaining it?
-    ## output_path is the filepath of where we want to save the image to
+# def binary_assign(path_to_img, threshold, output_path):
+#     ## path_to_img is the folder/file/pathway of the "raw" dataset image
+#     ## threshold is the lower boundary cut off value for assigning a 1 or 0 (choose a number between 0 and 255)
+#         ## a hyperparameter? Or is there a more systematic way of obtaining it?
+#     ## output_path is the filepath of where we want to save the image to
         
-        #### AT SOME POINT:
-        ## we may want to also introduce an upper limit threshold value e.g. for bright foreground stars contaminating images
-        ## this is not included in the original paper
+#         #### AT SOME POINT:
+#         ## we may want to also introduce an upper limit threshold value e.g. for bright foreground stars contaminating images
+#         ## this is not included in the original paper
     
-    ## assign binary pixel values to an image, given a threshold value
-    img_input = cv2.imread(path_to_img, 0)
-        ## the 0 argument reads the image as black and white
-        ## => 2D array, no RGB channels, easy
+#     ## assign binary pixel values to an image, given a threshold value
+#     img_input = cv2.imread(path_to_img, 0)
+#         ## the 0 argument reads the image as black and white
+#         ## => 2D array, no RGB channels, easy
 
-    img_array = np.array(img_input)
+#     img_array = np.array(img_input)
     
-    ## using the same i,j,m,n conventions as the paper
-    m = np.size(img_array[:,0]) ## number of rows
-    n = np.size(img_array[0,:]) ## number of columns
+#     ## using the same i,j,m,n conventions as the paper
+#     m = np.size(img_array[:,0]) ## number of rows
+#     n = np.size(img_array[0,:]) ## number of columns
     
-    ## CAREFUL with this datatype later, Pytorch is very picky about it
-    bin_image = np.zeros(np.shape(img_array),int)
+#     ## CAREFUL with this datatype later, Pytorch is very picky about it
+#     bin_image = np.zeros(np.shape(img_array),int)
     
-    for i in range(m):
-        for j in range(n):
-            if img_array[i,j] > threshold:
-                bin_image[i,j] += 1
-    # Multiply the array by 255 because cv2.imwrite takes the array values as colour values
-    # And we want the pixels above the threshold to appear white
-    im_array = 255*bin_image
+#     for i in range(m):
+#         for j in range(n):
+#             if img_array[i,j] > threshold:
+#                 bin_image[i,j] += 1
+#     # Multiply the array by 255 because cv2.imwrite takes the array values as colour values
+#     # And we want the pixels above the threshold to appear white
+#     im_array = 255*bin_image
 
-    cv2.imwrite(output_path, im_array)
-    ## this^ intermediate, unrotated binary image will need to be used later in "rotator" function, see below
+#     cv2.imwrite(output_path, im_array)
+#     ## this^ intermediate, unrotated binary image will need to be used later in "rotator" function, see below
 
-    ## return the np array
-    # returning the array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
-    return bin_image
-    
+#     ## return the np array
+#     # returning the array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
+#     return bin_image
+
+## Produce a binary image of a "raw" image from the dataset using OpenCV
+ def binary_assign(path_to_img, threshold):
+     grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+     max_val = 255
+     ret, image = cv2.threshold(grayscale, threshold, max_val, cv2.THRESH_BINARY)  
+     return bin_image
+
 ## get the centre row and centre column of a galaxy WITHIN its image
     ## i.e. not necessarily the IMAGE'S centre row/column
     ## need this to define 2x2 covariance matrix, see below
-def centre_row_col(bin_img_array): #.astype(int)): ## <-- this astype might be redundant if you use "int" in the binary_assign function
-    ## argument is the output of "binary_assign" (a 2D numpy array)
-        ## need it with int values here because the centre row, column values are indecies of the array
-        ## i.e. can't be floats
+# def centre_row_col(bin_img_array): #.astype(int)): ## <-- this astype might be redundant if you use "int" in the binary_assign function
+#     ## argument is the output of "binary_assign" (a 2D numpy array)
+#         ## need it with int values here because the centre row, column values are indecies of the array
+#         ## i.e. can't be floats
         
-    ## using the same i,j,m,n conventions as the paper
-    m = np.size(bin_img_array[:,0]) ## number of rows
-    n = np.size(bin_img_array[0,:]) ## number of columns
+#     ## using the same i,j,m,n conventions as the paper
+#     m = np.size(bin_img_array[:,0]) ## number of rows
+#     n = np.size(bin_img_array[0,:]) ## number of columns
     
-    centre_i = 0 ## centre row index
-    centre_j = 0 ## centre column index
+#     centre_i = 0 ## centre row index
+#     centre_j = 0 ## centre column index
     
-    for i in range(m):
-        for j in range(n):
-            centre_i += i*bin_img_array[i,j]
-            centre_j += j*bin_img_array[i,j]
+#     for i in range(m):
+#         for j in range(n):
+#             centre_i += i*bin_img_array[i,j]
+#             centre_j += j*bin_img_array[i,j]
             
-    centre_i /= (m*n)
-    centre_j /= (m*n)
+#     centre_i /= (m*n)
+#     centre_j /= (m*n)
     
-    ## these should be ints
-    return centre_i, centre_j
+#     ## these should be ints
+#     return centre_i, centre_j
+
+def centre_row_col(bin_img_array): 
+    # calculate moments of binary image
+    M = cv2.moments(bin_img_array)
+    # calculate x,y coordinate of center
+    cx = int(M["m10"] / M["m00"])
+    cy = int(M["m01"] / M["m00"])
+    return cx, cy
 
 ## gets the 2x2 cov matrix, per image (equation 4)
     ## not to be confused with the big covariance matrix, see "data_compression.py"
@@ -126,12 +142,16 @@ def theta_angle(cov_matrix):
     theta = np.arctan2(PC1[1],PC1[0])  ## again, might need to swap those two arguments later
     return theta                       ## again, this is in radians, from -pi to pi
 
+def rotate(image, angle):
+    angle_deg = math.degrees(angle)
+    output = ndimage.rotate(image, angle_deg, reshape=False)
+    return output
+
 ## STILL NEEDED:
     ## an actual image rotater (by the angle theta, obtained above) 
     ## something that re-scales the images/gets rid of background columns
         ## authors are somewhat ambiguous on how they did it..
     ## something that saves np array as an image file
-
 
 ## This could work for rotation:
 ## https://pyimagesearch.com/2021/01/20/opencv-rotate-image/
