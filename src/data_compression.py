@@ -79,6 +79,18 @@ def big_cov_matrix(mean_img,path_to_images):
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
+# def cov_to_pcs(cov_mat: np.ndarray) -> '(eigenvalues, arrays)':
+#     '''_summary_
+
+#     Args:
+#         cov_mat (np.ndarray): _description_
+
+#     Returns:
+#         (eigenvalues, arrays): _description_
+#     '''
+
+#     arrays = cov_mat
+#     return (eigenvalues, arrays)
 
 ## STILL NEED:
     ## PCA on the big cov matrix above (i.e. get set of eigenvectors ranked by eigenvalues)
