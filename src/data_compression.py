@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from nptyping import NDArray
+from sklearn.decomposition import PCA
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -104,18 +105,22 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-# def cov_to_pcs(cov_mat: np.ndarray) -> '(eigenvalues, arrays)':
-#     '''_summary_
+def cov_to_pcs(cov_mat: NDArray, n_components: int) -> NDArray:
+    '''
+    Returns the first n eigenvalues of the covariant matrix. 
+    First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
 
-#     Args:
-#         cov_mat (np.ndarray): _description_
+    Args:
+        cov_mat (NDArray): The big covariant matrix
 
-#     Returns:
-#         (eigenvalues, arrays): _description_
-#     '''
+    Returns:
+        NDArray: A 2D-Array, each column is an eigenvector of cov_mat
+    '''
 
-#     arrays = cov_mat
-#     return (eigenvalues, arrays)
+    pca = PCA(n_components=n_components)
+    result = pca.fit_transform(cov_mat)
+
+    return result
 
 ## STILL NEED:
     ## PCA on the big cov matrix above (i.e. get set of eigenvectors ranked by eigenvalues)
