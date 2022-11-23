@@ -10,7 +10,7 @@ import os
 
 # sys.path.append('src')
 
-from image_analysis import binary_assign, centre_row_col, small_cov_matrix, theta_angle, rotate
+from image_analysis import binary_assign, centre_row_col, small_cov_matrix, theta_angle, rotate, crop
 
 ## DATASET STUFF...
 ## we should have some folder like "dataset" with all of our raw images in it 
@@ -19,12 +19,13 @@ from image_analysis import binary_assign, centre_row_col, small_cov_matrix, thet
     ## see "dataset_generate.py"
 
 ## we should make a separate folder with all of the processed, binary images too (see below)
+    ## see "processed_images"
 
 binary_threshold = 123 ## some number for assigning binary image pixel values
                        ## could also be included in some hyperparameter dictionary like the assignments, or command line argument?
                        ## or obtained some other clever way (automation, etc)
                          ## potentially: opencv tools (see "image_analysis.py", last few lines) 
-        
+final_shape = (128, 128)      
         
 PATH_TO_RAW_IMAGES = "../raw_images/"    ## relative should work if this script is in 'src'
 PATH_TO_PROCESSED_IMAGES = "../processed_images/"    ## "  "  "  "  "  "
@@ -37,7 +38,8 @@ for n in range(len(raw_img_names)):
     C_2x2 = small_cov_matrix(binary_image_array, i_bar, j_bar)
     theta_rotate_angle = theta_angle(C_2x2)
     rotated_image_array = rotate(binary_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
-    
+    processed_image = crop(rotated_image_array, final_shape)
+    cv2.imwrite(f'../processed_images/{raw_img_names[n]}.jpg', processed_image)
     ## rotate, rescale, save array as a processed image to new folder
     
     
