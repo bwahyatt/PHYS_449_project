@@ -43,6 +43,7 @@ Note: you could also use conda, or another package manager to create and manage 
 - requests
 - scikit-learn
 - pytorch
+- nptyping
 
 ### Use this command to install the required packages
 
