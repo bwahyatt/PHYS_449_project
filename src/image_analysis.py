@@ -147,6 +147,12 @@ def rotate(image, angle):
     output = ndimage.rotate(image, angle_deg, reshape=False)
     return output
 
+def crop(img, shape):
+    # img = array of the input image
+    # shape = (int , int)
+    crop = cv2.resize(img, dsize=  shape, interpolation = cv2.INTER_CUBIC)
+    return crop 
+
 ## STILL NEEDED:
     ## an actual image rotater (by the angle theta, obtained above) 
     ## something that re-scales the images/gets rid of background columns
