@@ -215,8 +215,12 @@ def crop(img, shape):
 ## STILL NEEDED:
     ## something that re-scales the images/gets rid of background columns
         ## authors are somewhat ambiguous on how they did it..
+        ## Meg - Rach and I discussed how our images are already quite cropped compared to the images in the paper
+        ## do we really need to crop it more? 
     ## something that saves final np array as an image file
        ## this can just be done in "image_processer_script.py" loop
+       ## Meg - yeah we'll do that
+
 
 
 # if __name__ == '__main__':
