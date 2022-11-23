@@ -209,7 +209,7 @@ def rotate(image: NDArray, angle: float) -> NDArray:
 def crop(img, shape):
     # img = array of the input image
     # shape = (int , int)
-    crop = cv2.resize(img, dsize=  shape, interpolation = cv2.INTER_CUBIC)
+    crop = cv2.resize(img, dsize = shape, interpolation = cv2.INTER_CUBIC)
     return crop 
 
 ## STILL NEEDED:
