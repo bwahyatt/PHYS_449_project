@@ -136,20 +136,20 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-def cov_to_pcs(cov_mat: NDArray, n_components: int) -> NDArray:
+def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int) -> NDArray:
     '''
     Returns the first n eigenvalues of the covariant matrix. 
     First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
 
     Args:
-        cov_mat (NDArray): The big covariant matrix
+        mat_of_thetas (NDArray): The big covariant matrix
 
     Returns:
-        NDArray: A 2D-Array, each column is an eigenvector of cov_mat
+        NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
     '''
 
     pca = PCA(n_components=n_components)
-    result = pca.fit_transform(cov_mat)
+    result = pca.fit_transform(mat_of_thetas)
 
     return result
 
@@ -157,7 +157,7 @@ def cov_to_pcs(cov_mat: NDArray, n_components: int) -> NDArray:
 def feature_extract(pca_matrix, flat_img, mean_img):
     '''
     Args (all arrays):
-        pca_matrix = output of cov_to_pcs function  (2D)
+        pca_matrix = output of mat_of_thetas_to_pcs function  (2D)
         flat_img = flattened vector of a processed image, output of flattener function (1D)
         mean_img = averaged flattened image vector of whole processed dataset, output of mean_image_vec function (1D)
             (in whatever script we end up running with these, it is going to be best to call this mean function globally a single time
