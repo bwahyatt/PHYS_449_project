@@ -153,6 +153,21 @@ def cov_to_pcs(cov_mat: NDArray, n_components: int) -> NDArray:
 
     return result
 
-## STILL NEED:
-    ## PCA on the big cov matrix above (i.e. get set of eigenvectors ranked by eigenvalues)
-    ## feature extraction (projecting theta vectors onto the^ principle components of C)
+## see: equation 9 of paper
+def feature_extract(pca_matrix, flat_img, mean_img):
+    '''
+    Args (all arrays):
+        pca_matrix = output of cov_to_pcs function  (2D)
+        flat_img = flattened vector of a processed image, output of flattener function (1D)
+        mean_img = averaged flattened image vector of whole processed dataset, output of mean_image_vec function (1D)
+            (in whatever script we end up running with these, it is going to be best to call this mean function globally a single time
+            e.g. rather than calling it inside this function, which has to be called for every processed image)
+    
+    Returns:
+        1D array of an image's feature vector
+    '''
+    
+    PCsT = np.transpose(pca_matrix)
+    proj = np.dot(PCsT, flat_img-mean_img)
+    return proj
+    
