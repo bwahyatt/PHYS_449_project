@@ -154,7 +154,7 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int) -> NDArray:
     return result
 
 ## see: equation 9 of paper
-def feature_extract(pca_matrix, flat_img, mean_img):
+def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -> NDArray:
     '''
     Args (all arrays):
         pca_matrix = output of mat_of_thetas_to_pcs function  (2D)
