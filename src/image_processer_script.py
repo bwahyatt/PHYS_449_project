@@ -41,6 +41,7 @@ for n in range(len(raw_img_names)):
     processed_image = crop(rotated_image_array, final_shape)
     
     ## dropping the '.jpg' from the string, looks like cv2 takes care of it
+    ## our processed images end with .jpg.jpg
     cv2.imwrite(f'../processed_images/{raw_img_names[n]}', processed_image)
     ## rotate, rescale, save array as a processed image to new folder
     
