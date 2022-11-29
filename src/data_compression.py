@@ -5,6 +5,8 @@ import os
 from nptyping import NDArray
 from sklearn.decomposition import PCA
 
+from src.image_analysis import normalize_binary_image
+
 def flattener(path_to_image: str) -> NDArray:
     '''
     Obtains the flattened image vector of the (processed) galaxy image
@@ -29,8 +31,9 @@ def flattener(path_to_image: str) -> NDArray:
         ## there are arguments you can give it to flatten it differently,
         ## e.g. by columns
         ## I think it should be fine either way (?)
-
-    return img_array_flat
+        
+    ## adding the binary normalization here
+    return normalize_binary_image(img_array_flat)
 
 
 def mean_image_vec(path_to_images: str) -> NDArray:
@@ -58,6 +61,8 @@ def mean_image_vec(path_to_images: str) -> NDArray:
 
     for img_name in all_imgs_list:
         full_fname = path_to_images+'/'+img_name
+        
+        ## added the binary normalization in flattener
         mean_img += flattener(full_fname)
 
     mean_img /= len(all_imgs_list)
