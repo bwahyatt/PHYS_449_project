@@ -5,7 +5,7 @@ from torch import nn
 
 class Net(nn.Module):
     
-    def __init__(self):
+    def __init__(self, feature_dim: int, nodes: int, num_classes: int):
         super(Net, self).__init__() 
         
         '''
