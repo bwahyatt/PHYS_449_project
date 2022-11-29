@@ -4,10 +4,11 @@
 
 import torch
 import numpy as np
+import pandas as pd
 import sys
+import os
 
-sys.path.append('src')
-from neural_net import Net
+from src.neural_net import Net
 
 ## this path can be made a variable/command line argument/json file parameter/etc later
 ## (or not)
@@ -29,8 +30,7 @@ feature_size = 8 ## or 13 or 25 or whatever we want. But, it is something we hav
                  ## to recreate paper, we will probably need to try all 3 author values?
     
 ## read in our labels
-ids_and_labels = np.loadtxt('ids_and_labels.csv', skiprows=1) ## skip the column labels
-
+ids_and_labels = pd.read_csv('ids_and_labels.csv') 
 
 
 
