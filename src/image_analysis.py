@@ -122,6 +122,29 @@ def centre_row_col(bin_img_array: NDArray) -> Tuple[int]:
     cy = int(M["m01"] / M["m00"])
     return cx, cy
 
+def normalize_binary_image(bin_img_array: NDArray) -> NDArray:
+    '''
+    Sets all values in the bin_img_array to either 0 or 1
+
+    Args:
+        bin_img_array (NDArray): The binary image array with 255 representing the on state
+
+    Returns:
+        NDArray: The same binary image array, but with 255 mapped to 1.
+    '''
+    return bin_img_array // 255
+
+def bin_arr_times_255(bin_img_array: NDArray) -> NDArray:
+    '''
+    Inverse mapping of normalize_binary_image()
+
+    Args:
+        bin_img_array (NDArray): The binary image array with 1 representing the on state
+
+    Returns:
+        NDArray: The same binary image array, but with 1 mapped to 255.
+    '''
+    return bin_img_array * 255
 
 def small_cov_matrix(bin_img_array: NDArray, centre_i: int, centre_j: int) -> NDArray:
     '''
