@@ -39,7 +39,9 @@ for n in range(len(raw_img_names)):
     theta_rotate_angle = theta_angle(C_2x2)
     rotated_image_array = rotate(binary_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
     processed_image = crop(rotated_image_array, final_shape)
-    cv2.imwrite(f'../processed_images/{raw_img_names[n]}.jpg', processed_image)
+    
+    ## dropping the '.jpg' from the string, looks like cv2 takes care of it
+    cv2.imwrite(f'../processed_images/{raw_img_names[n]}', processed_image)
     ## rotate, rescale, save array as a processed image to new folder
     
     
