@@ -8,53 +8,6 @@ from scipy import ndimage, misc
 from nptyping import NDArray
 from typing import Tuple
 
-# def binary_assign(path_to_img: str, threshold: int, output_path: str) -> NDArray:
-#     '''
-#     Produce a binary image of a "raw" image from the dataset
-
-#     Args:
-#         path_to_img (str): The folder/file/pathway of the "raw" dataset image
-#         threshold (int): The lower boundary cut off value for assigning a 1 or 0 (choose a number between 0 and 255)
-#             a hyperparameter? Or is there a more systematic way of obtaining it?
-#         output_path (str): The filepath of where we want to save the image to
-
-#     Returns:
-#         NDArray: The array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
-
-#     '''
-        
-#     #### AT SOME POINT:
-#     ## we may want to also introduce an upper limit threshold value e.g. for bright foreground stars contaminating images
-#     ## this is not included in the original paper
-    
-#     ## assign binary pixel values to an image, given a threshold value
-#     img_input = cv2.imread(path_to_img, 0)
-#         ## the 0 argument reads the image as black and white
-#         ## => 2D array, no RGB channels, easy
-
-#     img_array = np.array(img_input)
-    
-#     ## using the same i,j,m,n conventions as the paper
-#     m = np.size(img_array[:,0]) ## number of rows
-#     n = np.size(img_array[0,:]) ## number of columns
-    
-#     ## CAREFUL with this datatype later, Pytorch is very picky about it
-#     bin_image = np.zeros(np.shape(img_array),int)
-    
-#     for i in range(m):
-#         for j in range(n):
-#             if img_array[i,j] > threshold:
-#                 bin_image[i,j] += 1
-#     # Multiply the array by 255 because cv2.imwrite takes the array values as colour values
-#     # And we want the pixels above the threshold to appear white
-#     im_array = 255*bin_image
-
-#     cv2.imwrite(output_path, im_array)
-#     ## this^ intermediate, unrotated binary image will need to be used later in "rotator" function, see below
-
-#     ## return the np array
-#     # returning the array of 1s and 0s instead of 255s and 0s in case the fact that white is 1 and not 255 is important later on
-#     return bin_image
 
 def binary_assign(path_to_img: str, threshold: int) -> NDArray:
     '''
@@ -73,38 +26,6 @@ def binary_assign(path_to_img: str, threshold: int) -> NDArray:
     ret, bin_image = cv2.threshold(grayscale, threshold, max_val, cv2.THRESH_BINARY)  
     return bin_image
 
-
-# def centre_row_col(bin_img_array: NDArray) -> Tuple[int]: #.astype(int)): ## <-- this astype might be redundant if you use "int" in the binary_assign function   
-#     '''
-#     Get the centre row and centre column of a galaxy WITHIN its image
-#         ## i.e. not necessarily the IMAGE'S centre row/column
-#         ## need this to define 2x2 covariance matrix, see below
-
-#     Args:
-#         bin_img_array (NDArray): The output of "binary_assign" (a 2D numpy array)
-#             ## need it with int values here because the centre row, column values are indicies of the array
-#             ## i.e. can't be floats
-#     Returns:
-#         2-Tuple[int]: Indicies of the centre row, column of the galaxy
-#     '''
-        
-#     ## using the same i,j,m,n conventions as the paper
-#     m = np.size(bin_img_array[:,0]) ## number of rows
-#     n = np.size(bin_img_array[0,:]) ## number of columns
-    
-#     centre_i = 0 ## centre row index
-#     centre_j = 0 ## centre column index
-    
-#     for i in range(m):
-#         for j in range(n):
-#             centre_i += i*bin_img_array[i,j]
-#             centre_j += j*bin_img_array[i,j]
-            
-#     centre_i /= (m*n)
-#     centre_j /= (m*n)
-    
-#     ## these should be ints
-#     return centre_i, centre_j
 
 def centre_row_col(bin_img_array: NDArray) -> Tuple[int]: 
     '''
@@ -234,16 +155,6 @@ def crop(img, shape):
     # shape = (int , int)
     crop = cv2.resize(img, dsize = shape, interpolation = cv2.INTER_CUBIC)
     return crop 
-
-## STILL NEEDED:
-    ## something that re-scales the images/gets rid of background columns
-        ## authors are somewhat ambiguous on how they did it..
-        ## Meg - Rach and I discussed how our images are already quite cropped compared to the images in the paper
-        ## do we really need to crop it more? 
-    ## something that saves final np array as an image file
-       ## this can just be done in "image_processer_script.py" loop
-       ## Meg - yeah we'll do that
-
 
 
 # if __name__ == '__main__':
