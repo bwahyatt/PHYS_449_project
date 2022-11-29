@@ -134,7 +134,7 @@ def normalize_binary_image(bin_img_array: NDArray) -> NDArray:
     '''
     return bin_img_array // 255
 
-def bin_arr_times_255(bin_img_array: NDArray) -> NDArray:
+def unnormalize_binary_image(bin_img_array: NDArray) -> NDArray:
     '''
     Inverse mapping of normalize_binary_image()
 

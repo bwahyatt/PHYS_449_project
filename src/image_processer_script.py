@@ -13,7 +13,7 @@ from tqdm import tqdm
 # sys.path.append('src')
 
 from image_analysis import binary_assign, centre_row_col, small_cov_matrix
-from image_analysis import theta_angle, rotate, crop, normalize_binary_image
+from image_analysis import theta_angle, rotate, crop, normalize_binary_image, unnormalize_binary_image
 
 ## DATASET STUFF...
 ## we should have some folder like "dataset" with all of our raw images in it 
@@ -46,17 +46,23 @@ except:
 ## raw_img_names = list of the raw image file names
 
 for n in tqdm(range(len(raw_img_names)), desc = 'Processing Images'):
+    # Import image as a binary array and normalize it
     binary_image_array = binary_assign(PATH_TO_RAW_IMAGES+raw_img_names[n], binary_threshold)
     normd_bin_img_arr = normalize_binary_image(binary_image_array)
+    
+    # Perform the various image processing steps
     i_bar, j_bar = centre_row_col(normd_bin_img_arr)
     C_2x2 = small_cov_matrix(normd_bin_img_arr, i_bar, j_bar)
     theta_rotate_angle = theta_angle(C_2x2)
     rotated_image_array = rotate(normd_bin_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
     processed_image = crop(rotated_image_array, final_shape)
     
+    # Unnormalize the processed image
+    processed_image = unnormalize_binary_image(processed_image)
+    
     ## dropping the '.jpg' from the string, looks like cv2 takes care of it
     ## our processed images end with .jpg.jpg
-    cv2.imwrite(f'../processed_images/{raw_img_names[n]}', processed_image)
+    cv2.imwrite(f'{pdir}/processed_images/{raw_img_names[n]}', processed_image)
     ## rotate, rescale, save array as a processed image to new folder
     
     
