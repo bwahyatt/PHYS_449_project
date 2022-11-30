@@ -73,11 +73,36 @@ for k in range(train_end_index):
 ## seems a bit weird, last couple look like they are all zeroes?    
 print(feature_array[-1,:])
 
+## split the feature vectors of each galaxy into training and testing sets
 train_features_np = feature_array[0:train_end_index,:]
 test_features_np = feature_array[train_end_index:,:]
 
+## WE NEED: some set of INDECIES corresponding to each class, to give as a "label" for our loss function
+## looks like 'ids_and_labels' just has S and E classes at the moment
+## this is an ad hoc bit of code for now, should be more generalized in principle
+## e.g. if the "number of classes" hyperparameter is made > 2
+## I invite anyone who has a better idea on how to do this to tweak it 
+## but if we are just doing S and E, need something like:
+
+class_labels = np.zeros((len(ids_and_labels)), dtype=np.int64) ## according to my (Ben) A2, pytorch is expecting int64 for loss function
+for k in range(np.size(class_labels)):
+    
+    ## let spiral galaxies have a label = 0
+    ## let elliptical galaxies have label = 1
+    
+    ## is this how indexing in Pandas works?
+    ## i.e. will it recognize that underscore even though the original csv column is "Simple Classification" with a space?
+    if ids_and_labels.Simple_Classifcation[k] == 'E':
+        class_labels[k] = 1
+    elif ids_and_labels.Simple_Classifcation[k] == 'S':
+        continue
+    else:
+        raise ValueError("your ad hoc label thing needs more classes")
+
+        
+## NN stuff - cf. Workshop 2 / assignment 2
 model = Net(feature_size, hidden_nodes, num_class)
-optimizer = optim.SGD(model.parameters(), lr=alpha) 
+optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
 loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
 
 ## this is how i (Ben) structure my training loops in the assignments, not written in stone or anything though, feel free to tweak
@@ -115,8 +140,25 @@ while epoch_count < epochs:
         epoch_count += 1
         continue 
         
-
-    #### PYTORCH TRAINING STUFF HERE #####
+    ## then something like:
+    ## (note: the size of this tensor is [batch size] x [number of classes],
+    ## with its ROWS being the (non-softmaxed) model output PER galaxy
+    NN_output = model.forward(torch.from_numpy(current_train_batch))
+    
+    ## get the correct labels
+    label_batch = torch.from_numpy(class_labels[ind:batch_end])
+    
+    ## compute the loss
+    loss_value = loss(NN_output, label_batch) 
+    
+    ## update weights etc
+    optimizer.zero_grad()
+    loss_value.backward() 
+    optimizer.step() 
+    
+    #### MORE STUFF HERE #####
+    ## e.g. getting list of loss values for plotting?
+    ## getting something for "accuracy" (how many model predictions have loss value = 0 or =/= 0)
  
     ## then, if you are at the end of the epoch:
     if epoch_complete:
