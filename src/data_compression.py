@@ -147,7 +147,7 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int) -> NDArray:
     First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
 
     Args:
-        mat_of_thetas (NDArray): The big covariant matrix
+        mat_of_thetas (NDArray): The output of matrix_of_thetas()
 
     Returns:
         NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
