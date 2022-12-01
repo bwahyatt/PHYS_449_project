@@ -148,8 +148,8 @@ def main():
         ## then something like:
         ## (note: the size of this tensor is [batch size] x [number of classes],
         ## with its ROWS being the (non-softmaxed) model output PER galaxy
-        NN_output = model.forward(torch.from_numpy(current_train_batch))
-        
+
+        NN_output = model.forward(torch.from_numpy(current_train_batch.astype(np.float32)))  ## needs to be float32, forward doesn't like float64
         ## get the correct labels
         label_batch = torch.from_numpy(class_labels[ind:batch_end])
         

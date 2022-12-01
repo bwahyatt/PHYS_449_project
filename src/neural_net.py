@@ -25,8 +25,8 @@ class Net(nn.Module):
         ## https://www.mathworks.com/help/deeplearning/ref/tansig.html
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
-        
-        h = nn.Tanh(self.fc1(x))
+        tan = nn.Tanh()
+        h = tan(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
         y = self.fc2(h)
         
         ## return y for now? 
