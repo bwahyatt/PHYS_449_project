@@ -4,13 +4,13 @@
 
 import torch
 from torch import nn
-#import torch.nn.functional as func
 import torch.optim as optim
 import numpy as np
 import pandas as pd
 import sys
 import os
 import json
+import matplotlib.pyplot as plt
 
 from src.neural_net import Net
 import src.data_compression as dc  ## I think we need all of them 
@@ -96,9 +96,9 @@ def main():
         
         ## is this how indexing in Pandas works?
         ## i.e. will it recognize that underscore even though the original csv column is "Simple Classification" with a space?
-        if ids_and_labels.Simple_Classifcation[k] == 'E':
+        if ids_and_labels['Simple Classification'][k] == 'E':
             class_labels[k] = 1
-        elif ids_and_labels.Simple_Classifcation[k] == 'S':
+        elif ids_and_labels['Simple Classification'][k] == 'S':
             continue
         else:
             raise ValueError("your ad hoc label thing needs more classes")
@@ -114,6 +114,7 @@ def main():
 
     epoch_count = 0
     ind = 0           ## this index will be the first index of the current patch of data
+    loss_list = []    ## plot this after training
 
     while epoch_count < epochs:
         
@@ -155,13 +156,16 @@ def main():
         ## compute the loss
         loss_value = loss(NN_output, label_batch) 
         
+        ## add to the list to plot it
+            ## or maybe "if [training step number] % 10 = 0 " or something if we don't want too too many
+        loss_list.append(loss_value)
+        
         ## update weights etc
         optimizer.zero_grad()
         loss_value.backward() 
         optimizer.step() 
         
         #### MORE STUFF HERE #####
-        ## e.g. getting list of loss values for plotting?
         ## getting something for "accuracy" (how many model predictions have loss value = 0 or =/= 0)
     
         ## then, if you are at the end of the epoch:
@@ -170,6 +174,24 @@ def main():
             epoch_count += 1
         else:
             ind += batch     ## or, if you are not finished the epoch, begin the next batch after your current one
+            
+    
+    ## training loss plot
+    plt.plot(loss_list)
+    plt.title('Training loss')
+    plt.ylabel('loss value')
+    plt.xlabel('training iteration')
+    plt.savefig('training_loss.pdf')
+    plt.show()
+    
+    ## Finally, test data
+    ## can do it all as one big batch 
+    test_output = model.forward(torch.from_numpy(test_features_np))
+    test_labels = torch.from_numpy(class_labels[train_end_index:])
+    test_loss = loss(test_output, test_labels)
+    
+    print(f'TEST DATA LOSS: {test_loss}')
+    
     
 if __name__ == '__main__':
     main()
