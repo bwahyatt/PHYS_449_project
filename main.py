@@ -72,7 +72,9 @@ def main():
         
         feature_array[k,:] += current_feature_vec
         
-    ## seems a bit weird, last couple look like they are all zeroes?    
+    ## seems a bit weird, last couple look like they are all zeroes? 
+    ## NOTE: (Skye) either the last few images are indistinguishable from the mean image, or I implemented PCA wrong. I'll look into this soon.   
+    ## NOTE: Probably the latter, just checked the last two images, and they look different from each other.
     print(feature_array[-1,:])
 
     ## split the feature vectors of each galaxy into training and testing sets
