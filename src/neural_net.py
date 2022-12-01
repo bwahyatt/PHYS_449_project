@@ -26,7 +26,7 @@ class Net(nn.Module):
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
         
-        h = nn.tanh(self.fc1(x))
+        h = nn.Tanh(self.fc1(x))
         y = self.fc2(h)
         
         ## return y for now? 
