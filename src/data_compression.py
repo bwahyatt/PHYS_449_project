@@ -27,7 +27,7 @@ def flattener(path_to_image: str) -> NDArray:
         ## the 0 argument reads the image as black and white
             ## => 2D array, no RGB channels (?)
         ## might end up being redundant due to binary image processing
-    img_array = np.array(img_input)
+    img_array = np.array(img_input).astype(np.float32)
     #cv2.imshow("display",img_array)
 
     img_array_flat = img_array.flatten()
@@ -206,7 +206,7 @@ def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -
     
     PCsT = np.transpose(pca_matrix)
     proj = np.dot(PCsT, flat_img-mean_img)
-    proj /= la.norm(proj)
+    #proj /= la.norm(proj)
     return proj
     
 def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, mean_img_arr: NDArray, display_img: bool = False) -> NDArray:

@@ -65,7 +65,7 @@ def main():
 
     feature_array = np.zeros((len(ids_and_labels), feature_size), float) ## or int? see what pytorch inevitably complains about 
 
-    for k in range(train_end_index): 
+    for k in range(len(processed_imgs_list)): 
         processed_fname = f'{proc_path}/{ids_and_labels.ID[k]}.jpg'
         current_flat_img = dc.flattener(processed_fname)
         current_feature_vec = dc.feature_extract(PCA_matrix, current_flat_img, mean_vector)
@@ -75,8 +75,9 @@ def main():
     ## seems a bit weird, last couple look like they are all zeroes? 
     ## NOTE: (Skye) either the last few images are indistinguishable from the mean image, or I implemented PCA wrong. I'll look into this soon.   
     ## NOTE: Probably the latter, just checked the last two images, and they look different from each other.
+    ## This^ problem has been resolved. I was only adding feature vectors up to the end of the training data, excluded the test data LOL
     print(feature_array[-1,:])
-
+    
     ## split the feature vectors of each galaxy into training and testing sets
     train_features_np = feature_array[0:train_end_index,:]
     test_features_np = feature_array[train_end_index:,:]
@@ -108,7 +109,7 @@ def main():
     model = Net(feature_size, hidden_nodes, num_class)
     optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
     loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
-
+    
     ## this is how i (Ben) structure my training loops in the assignments, not written in stone or anything though, feel free to tweak
     ## I usually "count" how many epochs I have gone through, and use a "while" loop
 
@@ -158,7 +159,9 @@ def main():
         
         ## add to the list to plot it
             ## or maybe "if [training step number] % 10 = 0 " or something if we don't want too too many
-        loss_list.append(loss_value.detach().numpy())
+        ## if we have a lot of epochs, this could be a tracer value for our loss (i.e. just the first batch)
+        if ind == 0:
+            loss_list.append(loss_value.detach().numpy())
         
         ## update weights etc
         optimizer.zero_grad()
@@ -182,7 +185,7 @@ def main():
     plt.plot(loss_list)
     plt.title('Training loss')
     plt.ylabel('loss value')
-    plt.xlabel('training iteration')
+    plt.xlabel('training epoch')
     plt.savefig('training_loss.pdf')
     plt.show()
     
