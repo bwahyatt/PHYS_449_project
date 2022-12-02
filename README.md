@@ -50,3 +50,6 @@ Note: you could also use conda, or another package manager to create and manage 
 ```sh
 pip install -r requirements.txt
 ```
+
+### sdss package credits
+The "sdss" folder in our "src" folder comes from the "sdss" package created by Behrouz Safari (https://github.com/behrouzz/sdss). Used under an MIT open source license 
