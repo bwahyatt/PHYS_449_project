@@ -158,7 +158,7 @@ def main():
         
         ## add to the list to plot it
             ## or maybe "if [training step number] % 10 = 0 " or something if we don't want too too many
-        loss_list.append(loss_value)
+        loss_list.append(loss_value.detach().numpy())
         
         ## update weights etc
         optimizer.zero_grad()
@@ -177,6 +177,8 @@ def main():
             
     
     ## training loss plot
+    # print(type(loss_list[0]))
+    # print(type(range(epochs)))
     plt.plot(loss_list)
     plt.title('Training loss')
     plt.ylabel('loss value')
@@ -186,7 +188,7 @@ def main():
     
     ## Finally, test data
     ## can do it all as one big batch 
-    test_output = model.forward(torch.from_numpy(test_features_np))
+    test_output = model.forward(torch.from_numpy(test_features_np.astype(np.float32)))
     test_labels = torch.from_numpy(class_labels[train_end_index:])
     test_loss = loss(test_output, test_labels)
     

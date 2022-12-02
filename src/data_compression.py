@@ -10,7 +10,7 @@ from datetime import datetime as dt
 import scipy as sp
 
 # from src.image_analysis import normalize_binary_image
-from image_analysis import normalize_binary_image, unnormalize_binary_image
+from src.image_analysis import normalize_binary_image, unnormalize_binary_image
 
 def flattener(path_to_image: str) -> NDArray:
     '''
