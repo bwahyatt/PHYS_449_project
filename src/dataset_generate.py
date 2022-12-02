@@ -58,6 +58,6 @@ def dataset_generate(galaxy_zoo_csv: str, N: int, imgs_output_dir: str, labels_c
 
 if __name__ == '__main__':
     dataset_generate(galaxy_zoo_csv = 'sdss_shortened.csv',
-                     N = 310,
+                     N = 450,
                      imgs_output_dir = 'raw_images',
                      labels_csv = 'ids_and_labels')
