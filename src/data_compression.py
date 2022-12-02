@@ -10,7 +10,7 @@ from datetime import datetime as dt
 import scipy as sp
 
 # from src.image_analysis import normalize_binary_image
-from image_analysis import normalize_binary_image
+from image_analysis import normalize_binary_image, unnormalize_binary_image
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -40,13 +40,33 @@ def flattener(path_to_image: str) -> NDArray:
     ## adding the binary normalization here
     return normalize_binary_image(img_array_flat)
 
-def unflatten(img_arr: NDArray, new_shape: Tuple = (128,128)) -> NDArray:
-    
+def unflattener(img_arr: NDArray, new_shape: Tuple = (128,128)) -> NDArray:
+    '''
+    Converts the image array back into a 128 x 128 image array
+
+    Args:
+        img_arr (NDArray): The flattened image array
+        new_shape (Tuple, optional): The dimensions of the new array. Defaults to (128,128).
+
+    Returns:
+        NDArray: The unflattened array
+    '''
     return np.reshape(img_arr, new_shape)
 
-def show_img_arr(img_arr: NDArray, output_path: str = None, show_img: bool = True):
-    
+def show_img_arr(img_arr: NDArray, output_path: str = None, show_img: bool = True, title: str = None, unflatten: bool = False):
+    '''_summary_
+
+    Args:
+        img_arr (NDArray): An image array
+        output_path (str, optional): Path to output the plot file to. Defaults to None, in which case, no file is outputted.
+        show_img (bool, optional): Indicates whether to show the image. Defaults to True.
+        title (str, optional): The title for the image. Defaults to None, in which case, no title is given.
+    '''
+    if unflatten:
+        img_arr = unflattener(img_arr)
     plt.imshow(img_arr, cmap = 'gray')
+    if title is not None:
+        plt.title(title)
     if output_path is not None:
         plt.imsave(output_path, img_arr, cmap = 'gray')
     if show_img:
@@ -152,19 +172,22 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str 
         NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
     '''
 
+    start_time = dt.now()
     if method == 'sklearn':
         pca = PCA(n_components=n_components, **kwargs)
         result = pca.fit_transform(mat_of_thetas)
+        for i in range(result.shape[1]):
+            result[:,i] /= la.norm(result[:,i])
+            
     elif method == 'scipy.linalg':
-        start_time = dt.now()
         mat_of_thetas = sp.sparse.bsr_matrix(mat_of_thetas)
         C = mat_of_thetas @ mat_of_thetas.T
         w, result = sp.sparse.linalg.eigsh(C, k = n_components)
-        end_time = dt.now()
-        print(f"scipy.linalg execution time = {end_time-start_time} sec")
     else:
         raise ValueError('Unrecognized `method`. `method` should be one of "sklearn" or "numpy.linalg"')
 
+    end_time = dt.now()
+    print(f"{method} execution time = {end_time-start_time} sec")
     return result
 
 ## see: equation 9 of paper
@@ -183,33 +206,53 @@ def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -
     
     PCsT = np.transpose(pca_matrix)
     proj = np.dot(PCsT, flat_img-mean_img)
+    proj /= la.norm(proj)
     return proj
     
-def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, display_img: bool = False) -> NDArray:
+def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, mean_img_arr: NDArray, display_img: bool = False) -> NDArray:
+    '''
+    Returns the uncompressed version of the image from it's feature vector and the PC_mat that compressed it.
+
+    Args:
+        PC_mat (NDArray): The matrix that was used to compress the image
+        feature_vec (NDArray): The compressed features of the image
+        mean_img_arr (NDArray): The mean image array
+        display_img (bool, optional): Indicates whether the resulting image is displayed. Defaults to False.
+
+    Returns:
+        NDArray: The uncompressed image
+    '''
     img_arr = np.matmul(PC_mat, feature_vec)
-    img_arr = unflatten(img_arr)
+    img_arr = (img_arr) / (np.abs(img_arr).max()) + (mean_img_arr)
+    img_arr = unflattener(img_arr)
     if display_img:
-        show_img_arr(img_arr)
+        show_img_arr(img_arr, title = f'Number of PCs = {feature_vec.shape[0]}')
     return img_arr
 
 def save_eigengalaxies(PC_mat: NDArray, output_dir: str):
-    
+    '''
+    Saves all the eigengalaxies stored in PC_mat to the output_dir
+
+    Args:
+        PC_mat (NDArray): The matrix of eigengalaxies
+        output_dir (str): The directory to output all the images
+    '''
     n_vecs = PC_mat.shape[1]
     for i in range(n_vecs):
-        show_img_arr(unflatten(PC_mat[:,i]), f'{output_dir}/eigengalaxy_{i}.png', False)
+        show_img_arr(unflattener(PC_mat[:,i]), f'{output_dir}/eigengalaxy_{i}.png', False)
 
 if __name__ == '__main__':
     
     proc_path = os.path.abspath('./processed_images')
-    feature_size = 25
+    feature_size = 8
     mean_vector = mean_image_vec(proc_path)   
     thetas_mat = matrix_of_thetas(mean_vector, proc_path) 
     PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size, 'sklearn')
     
     mean_vector = mean_image_vec(proc_path)   
-    processed_fname = f'{proc_path}/1237662238560878668.jpg'
+    processed_fname = f'{proc_path}/1237661968495935570.jpg'
     current_flat_img = flattener(processed_fname)
     current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
-    uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, display_img=True)
+    uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, mean_vector, display_img=True)
     
     save_eigengalaxies(PCA_matrix, 'sandbox/outputs')
