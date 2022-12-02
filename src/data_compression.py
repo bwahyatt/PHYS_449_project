@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import os
 from nptyping import NDArray
 from sklearn.decomposition import PCA
+from typing import Tuple
 
-from src.image_analysis import normalize_binary_image
+# from src.image_analysis import normalize_binary_image
+from image_analysis import normalize_binary_image
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -35,6 +37,17 @@ def flattener(path_to_image: str) -> NDArray:
     ## adding the binary normalization here
     return normalize_binary_image(img_array_flat)
 
+def unflatten(img_arr: NDArray, new_shape: Tuple = (128,128)) -> NDArray:
+    
+    return np.reshape(img_arr, new_shape)
+
+def show_img_arr(img_arr: NDArray, output_path: str = None, show_img: bool = True):
+    
+    plt.imshow(img_arr, cmap = 'gray')
+    if output_path is not None:
+        plt.imsave(output_path, img_arr, cmap = 'gray')
+    if show_img:
+        plt.show()
 
 def mean_image_vec(path_to_images: str) -> NDArray:
     '''
@@ -141,7 +154,7 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int) -> NDArray:
+def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, **kwargs) -> NDArray:
     '''
     Returns the first n eigenvalues of the covariant matrix. 
     First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
@@ -153,7 +166,8 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int) -> NDArray:
         NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
     '''
 
-    pca = PCA(n_components=n_components)
+    pca = PCA(n_components=n_components, **kwargs)
+    # result = pca.fit_transform(mat_of_thetas.T)
     result = pca.fit_transform(mat_of_thetas)
 
     return result
@@ -176,3 +190,24 @@ def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -
     proj = np.dot(PCsT, flat_img-mean_img)
     return proj
     
+def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, display_img: bool = True) -> NDArray:
+    img_arr = np.matmul(PC_mat, feature_vec)
+    img_arr = unflatten(img_arr)
+    if display_img:
+        show_img_arr(img_arr)
+    return img_arr
+
+if __name__ == '__main__':
+    
+    proc_path = os.path.abspath('./processed_images')
+    feature_size = 8
+    mean_vector = mean_image_vec(proc_path)   
+    thetas_mat = matrix_of_thetas(mean_vector, proc_path) 
+    PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size)
+    
+    # processed_fname = f'{proc_path}/1237658312939798567.jpg'
+    # current_flat_img = flattener(processed_fname)
+    # current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
+    # uncompress_img(PCA_matrix, current_feature_vec)
+    for i in range(8):
+        show_img_arr(unflatten(PCA_matrix[:,i]), f'sandbox/outputs/eigengalaxy_{i}.png', False)
