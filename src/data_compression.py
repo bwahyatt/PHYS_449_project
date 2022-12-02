@@ -1,10 +1,13 @@
 import cv2
 import numpy as np
+import numpy.linalg as la
 import matplotlib.pyplot as plt
 import os
 from nptyping import NDArray
 from sklearn.decomposition import PCA
 from typing import Tuple
+from datetime import datetime as dt
+import scipy as sp
 
 # from src.image_analysis import normalize_binary_image
 from image_analysis import normalize_binary_image
@@ -132,29 +135,12 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
         NDArray: The covariance matrix
     '''
 
-    # ## list of all the processed image names, like the above function
-    # all_imgs_list = os.listdir(path_to_images)
-
-    # ## this matrix has columns that are "theta" vectors
-    #     ## num rows = size of these flattened image vectors
-    #     ## num columns = number of images in dataset
-    # ## dtype also float? 
-    # A_matrix = np.zeros((np.size(mean_img),len(all_imgs_list)),float)
-
-    # for m in range(len(all_imgs_list)):
-    #     ## path to individual (processed) image file
-    #     mth_img_path = path_to_images+'/'+all_imgs_list[m]         
-    #     theta_m = flattener(mth_img_path) - mean_img
-
-    #     ## might end up needing some "theta_m transpose" on RHS instead? (probably not) 
-    #     A_matrix[:,m] += theta_m
-
     A_matrix = matrix_of_thetas(mean_img, path_to_images)
     A_T = np.transpose(A_matrix)
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, **kwargs) -> NDArray:
+def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str = 'sklearn', **kwargs) -> NDArray:
     '''
     Returns the first n eigenvalues of the covariant matrix. 
     First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
@@ -166,9 +152,18 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, **kwargs) ->
         NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
     '''
 
-    pca = PCA(n_components=n_components, **kwargs)
-    # result = pca.fit_transform(mat_of_thetas.T)
-    result = pca.fit_transform(mat_of_thetas)
+    if method == 'sklearn':
+        pca = PCA(n_components=n_components, **kwargs)
+        result = pca.fit_transform(mat_of_thetas)
+    elif method == 'scipy.linalg':
+        start_time = dt.now()
+        mat_of_thetas = sp.sparse.bsr_matrix(mat_of_thetas)
+        C = mat_of_thetas @ mat_of_thetas.T
+        w, result = sp.sparse.linalg.eigsh(C, k = n_components)
+        end_time = dt.now()
+        print(f"scipy.linalg execution time = {end_time-start_time} sec")
+    else:
+        raise ValueError('Unrecognized `method`. `method` should be one of "sklearn" or "numpy.linalg"')
 
     return result
 
@@ -190,24 +185,31 @@ def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -
     proj = np.dot(PCsT, flat_img-mean_img)
     return proj
     
-def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, display_img: bool = True) -> NDArray:
+def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, display_img: bool = False) -> NDArray:
     img_arr = np.matmul(PC_mat, feature_vec)
     img_arr = unflatten(img_arr)
     if display_img:
         show_img_arr(img_arr)
     return img_arr
 
+def save_eigengalaxies(PC_mat: NDArray, output_dir: str):
+    
+    n_vecs = PC_mat.shape[1]
+    for i in range(n_vecs):
+        show_img_arr(unflatten(PC_mat[:,i]), f'{output_dir}/eigengalaxy_{i}.png', False)
+
 if __name__ == '__main__':
     
     proc_path = os.path.abspath('./processed_images')
-    feature_size = 8
+    feature_size = 25
     mean_vector = mean_image_vec(proc_path)   
     thetas_mat = matrix_of_thetas(mean_vector, proc_path) 
-    PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size)
+    PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size, 'sklearn')
     
-    # processed_fname = f'{proc_path}/1237658312939798567.jpg'
-    # current_flat_img = flattener(processed_fname)
-    # current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
-    # uncompress_img(PCA_matrix, current_feature_vec)
-    for i in range(8):
-        show_img_arr(unflatten(PCA_matrix[:,i]), f'sandbox/outputs/eigengalaxy_{i}.png', False)
+    mean_vector = mean_image_vec(proc_path)   
+    processed_fname = f'{proc_path}/1237662238560878668.jpg'
+    current_flat_img = flattener(processed_fname)
+    current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
+    uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, display_img=True)
+    
+    save_eigengalaxies(PCA_matrix, 'sandbox/outputs')

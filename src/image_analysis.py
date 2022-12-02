@@ -53,7 +53,7 @@ def normalize_binary_image(bin_img_array: NDArray) -> NDArray:
     Returns:
         NDArray: The same binary image array, but with 255 mapped to 1.
     '''
-    return bin_img_array // 255
+    return bin_img_array / 255
 
 def unnormalize_binary_image(bin_img_array: NDArray) -> NDArray:
     '''
