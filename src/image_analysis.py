@@ -24,6 +24,9 @@ def binary_assign(path_to_img: str, threshold: int) -> NDArray:
     grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     max_val = 255
     ret, bin_image = cv2.threshold(grayscale, threshold, max_val, cv2.THRESH_BINARY)  
+    if bin_image.max() == 0:
+        raise ValueError('Warning, this binary image is entirely blank! Binary threshold may be too high!')
+    
     return bin_image
 
 

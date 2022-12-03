@@ -6,5 +6,5 @@
     "num_class": 2,
     "batch": 10,
     "train_end_index": 293,
-    "binary_threshold": 123
+    "binary_threshold": 100
 }

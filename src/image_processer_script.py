@@ -5,6 +5,7 @@ import os
 from typing import Tuple
 from tqdm import tqdm
 import json
+from verbosity_printer import VerbosityPrinter
 
 ## this is currently just an OUTLINE of what an image processing script could/should look like
     ## this shouldn't be done in "main.py" since in principle we only need to do this once
@@ -51,7 +52,8 @@ def main():
         PATH_TO_RAW_IMAGES, PATH_TO_PROCESSED_IMAGES, raw_img_names = import_raw_imgs(pdir)
     ## raw_img_names = list of the raw image file names
 
-    for n in tqdm(range(len(raw_img_names)), desc = 'Processing Images'):
+    vprinter = VerbosityPrinter(1)
+    for n in tqdm(range(len(raw_img_names)), desc = 'Processing Images', disable = vprinter.system_verbosity == 0):
         # Import image as a binary array and normalize it
         binary_image_array = binary_assign(PATH_TO_RAW_IMAGES+raw_img_names[n], binary_threshold)
         normd_bin_img_arr = normalize_binary_image(binary_image_array)

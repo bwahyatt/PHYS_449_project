@@ -2,8 +2,10 @@ import sdss
 import numpy as np
 import cv2
 import pandas as pd
+from tqdm import tqdm
+from verbosity_printer import VerbosityPrinter
 
-def dataset_generate(galaxy_zoo_csv: str, N: int, imgs_output_dir: str, labels_csv: str) -> None:
+def dataset_generate(galaxy_zoo_csv: str, N: int, imgs_output_dir: str, labels_csv: str, vprinter: VerbosityPrinter = None) -> None:
     '''
     Generates our dataset of galaxies by extracting the relevant information from Galaxy Zoo
 
@@ -13,6 +15,9 @@ def dataset_generate(galaxy_zoo_csv: str, N: int, imgs_output_dir: str, labels_c
         imgs_output_dir (str): Filepath to output all the galaxy images
         labels_csv (str): Filepath to output the labels and IDs .csv file to
     '''
+    
+    if vprinter is None:
+        vprinter = VerbosityPrinter(1)
     
     try:
         pdir = '..'
@@ -29,7 +34,7 @@ def dataset_generate(galaxy_zoo_csv: str, N: int, imgs_output_dir: str, labels_c
     class_simple_list = []
 
 
-    for x in range(len(mini_zoo)):
+    for x in tqdm(range(len(mini_zoo)), desc = 'Retrieving and generating data from SDSS', disable = vprinter.system_verbosity == 0):
         ra = mini_zoo.iloc[x]['ra'] #Right ascension
         dec = mini_zoo.iloc[x]['dec'] #Declination 
         class_full = mini_zoo.iloc[x]['gz2_class'] #full classification
