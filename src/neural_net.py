@@ -18,7 +18,14 @@ class GalaxiesDataset(Dataset):
     Inheritance of the torch.utils.data.Dataset class
     '''
     
-    def __init__(self: Dataset, processed_images_dir: str, ids_and_labels_path: str, feature_size: int, train_dataset: Dataset = None, vprinter: VerbosityPrinter = None, transform = None, target_transform = None) -> None:
+    def __init__(self: Dataset, 
+                 processed_images_dir: str, 
+                 ids_and_labels_path: str, 
+                 feature_size: int, 
+                 train_dataset: Dataset = None, 
+                 vprinter: VerbosityPrinter = None, 
+                 transform = None, 
+                 target_transform = None) -> None:
         '''
         Inheritance of the torch.utils.data.Dataset class
 
@@ -28,6 +35,18 @@ class GalaxiesDataset(Dataset):
             ids_and_labels_path (str): File path to the ids and labels .csv file
             feature_size (int): The number of feature vectors to use to represent the data
             train_dataset (GalaxiesDataset): If we are constructing a training dataset, leave this parameter empty. If we are constructing a testing dataset, pass the training dataset into this parameter so that the testing dataset knows what the mean image and PCA matricies are
+            vprinter (VerbosityPrinter): Object that handles verbosity printing
+            transform (function, optional): A transformation function to apply to the image data. Defaults to None.
+            target_transform (function, optional): A transformation function to apply to the labels. Defaults to None.
+        
+        Attributes:
+            vprinter (VerbosityPrinter): Object that handles verbosity printing
+            ids_and_labels_path (str): File path to the ids and labels .csv file
+            feature_size (int): The number of feature vectors to use to represent the data
+            img_source_path_list (str): List of all images
+            mean_vector (NDArray): The mean image of the dataset
+            feature_array (NDArray): The features of each image
+            class_labels (NDArray): The labels of each image
             transform (function, optional): A transformation function to apply to the image data. Defaults to None.
             target_transform (function, optional): A transformation function to apply to the labels. Defaults to None.
         '''
@@ -40,7 +59,7 @@ class GalaxiesDataset(Dataset):
         self.feature_size = feature_size  
         
         # Process and label the data      
-        self.img_source_path = os.listdir(self.processed_images_dir)
+        self.img_source_path_list = os.listdir(self.processed_images_dir)
         if train_dataset is None:
             labelled_data = self.compress_and_label_data()
         else:
@@ -60,6 +79,7 @@ class GalaxiesDataset(Dataset):
 
         Args:
             self (GalaxiesDataset): The object representing our dataset of galaxies
+            mean_vector (NDArray): The mean image of the dataset
 
         Returns:
             NDArray: The PCA matrix
@@ -77,6 +97,7 @@ class GalaxiesDataset(Dataset):
 
         Args:
             self (GalaxiesDataset): The object representing our dataset of galaxies
+            train_dataset (GalaxiesDataset): If we are constructing a training dataset, leave this parameter empty. If we are constructing a testing dataset, pass the training dataset into this parameter so that the testing dataset knows what the mean image and PCA matricies are
         Raises:
             ValueError: If we need more classes, an error will be raised
 
@@ -94,7 +115,7 @@ class GalaxiesDataset(Dataset):
             PCA_matrix = train_dataset.compute_PCA_matrix(mean_vector)
         
         # Create feature vectors for each image
-        processed_imgs_list = self.img_source_path
+        processed_imgs_list = self.img_source_path_list
         ids_and_labels = pd.read_csv(self.ids_and_labels_path, index_col='ID')
         feature_array = np.zeros((len(ids_and_labels), self.feature_size), dtype = 'float32') 
         for k in tqdm(range(len(processed_imgs_list)), desc = "Creating feature vectors for each image", disable = self.vprinter.system_verbosity == 0): 
@@ -109,6 +130,13 @@ class GalaxiesDataset(Dataset):
             
             ## let spiral galaxies have a label = 0
             ## let elliptical galaxies have label = 1
+            
+            ## WE NEED: some set of INDECIES corresponding to each class, to give as a "label" for our loss function
+            ## looks like 'ids_and_labels' just has S and E classes at the moment
+            ## this is an ad hoc bit of code for now, should be more generalized in principle
+            ## e.g. if the "number of classes" hyperparameter is made > 2
+            ## I invite anyone who has a better idea on how to do this to tweak it 
+            ## but if we are just doing S and E, need something like:
             
             ## is this how indexing in Pandas works?
             ## i.e. will it recognize that underscore even though the original csv column is "Simple Classification" with a space?
@@ -128,6 +156,12 @@ class GalaxiesDataset(Dataset):
         return labelled_data
         
     def uncompress_and_display_img(self, index: int):
+        '''
+        Uncompresses and displays the image at index
+
+        Args:
+            index (int): The index to use to access a specific image from our dataset
+        '''
         dc.uncompress_img(self.compute_PCA_matrix(self.mean_vector), self[index][0], self.mean_vector, display_img = True)
         
     def __len__(self):
@@ -144,7 +178,7 @@ class GalaxiesDataset(Dataset):
 
 class Net(nn.Module):
     
-    def __init__(self, feature_dim: int, nodes: int, num_classes: int):
+    def __init__(self, feature_dim: int, hidden_nodes: int, num_classes: int):
         super(Net, self).__init__() 
         
         '''
@@ -156,8 +190,8 @@ class Net(nn.Module):
             authors use 2, 3, 5, and 7
         '''
         
-        self.fc1 = nn.Linear(feature_dim, nodes)            
-        self.fc2 = nn.Linear(nodes, num_classes)
+        self.fc1 = nn.Linear(feature_dim, hidden_nodes)            
+        self.fc2 = nn.Linear(hidden_nodes, num_classes)
         
     def forward(self, x):
         ## according to this:
@@ -182,6 +216,22 @@ class Net(nn.Module):
               save_model_path: str = None,
               show_accuracy: bool = False
               ) -> float:
+        '''
+        Trains the model using the training dataset
+
+        Args:
+            galaxies_data (GalaxiesDataset): The training dataset
+            loss_fn (Callable): A loss function for penalizing the model
+            optimizer (Callable): The optimization function to use to minimize the loss function
+            batch_size (int, optional): The number of datapoints to use in each batch. Defaults to 1.
+            vprinter (VerbosityPrinter, optional): Object that handles verbosity printing. Defaults to None.
+            device (str, optional): The device to use. Defaults to 'cpu'.
+            save_model_path (str, optional): The filepath to save model weights to. Defaults to None.
+            show_accuracy (bool, optional): If true, will print out the accuracy. Defaults to False.
+
+        Returns:
+            float: The loss value after training
+        '''
         
         if vprinter is None: 
             vprinter = VerbosityPrinter()
@@ -230,6 +280,20 @@ class Net(nn.Module):
             device: str = 'cpu',
             show_accuracy: bool = False
         ) -> float:
+        '''
+        Tests the model with a testing dataset
+
+        Args:
+            galaxies_data (GalaxiesDataset): The training dataset
+            loss_fn (Callable): A loss function for penalizing the model
+            vprinter (VerbosityPrinter, optional): Object that handles verbosity printing. Defaults to None.
+            batch_size (int, optional): The number of datapoints to use in each batch. Defaults to 1.
+            device (str, optional): The device to use. Defaults to 'cpu'.
+            show_accuracy (bool, optional): If true, will print out the accuracy. Defaults to False.
+            
+        Returns:
+            float: The loss value after training
+        '''
         
         dataloader = DataLoader(galaxies_data, batch_size = batch_size)
         size = len(dataloader.dataset)
@@ -252,7 +316,6 @@ class Net(nn.Module):
         
         return test_loss
         
-    
     ## copying this from workshop 2 as well
     ## e.g. if we wanna change number of feature vector elements/hidden layers like author, we can use this same outline
     def reset(self):
