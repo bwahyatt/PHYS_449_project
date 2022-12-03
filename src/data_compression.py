@@ -11,6 +11,7 @@ import scipy as sp
 
 # from src.image_analysis import normalize_binary_image
 from src.image_analysis import normalize_binary_image, unnormalize_binary_image
+from src.verbosity_printer import VerbosityPrinter
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -160,7 +161,7 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
 
     return np.dot(A_matrix, A_T) ## this should be the covariance matrix
     
-def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str = 'sklearn', **kwargs) -> NDArray:
+def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str = 'sklearn', vprinter: VerbosityPrinter = None, **kwargs) -> NDArray:
     '''
     Returns the first n eigenvalues of the covariant matrix. 
     First n is decided by taking the largest n eigenvalues' corresponding eigenvectors
@@ -171,6 +172,8 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str 
     Returns:
         NDArray: A 2D-Array, each column is an eigenvector of mat_of_thetas
     '''
+    if vprinter is None:
+        vprinter = VerbosityPrinter()   
 
     start_time = dt.now()
     if method == 'sklearn':
@@ -187,7 +190,7 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str 
         raise ValueError('Unrecognized `method`. `method` should be one of "sklearn" or "numpy.linalg"')
 
     end_time = dt.now()
-    print(f"{method} execution time = {end_time-start_time} sec")
+    vprinter.vprint(f"{method} execution time = {end_time-start_time} sec", 1)
     return result
 
 ## see: equation 9 of paper
