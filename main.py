@@ -12,17 +12,25 @@ import os
 import json
 import matplotlib.pyplot as plt
 
-from src.neural_net import Net
+from src.neural_net import Net, GalaxiesDataset
 import src.data_compression as dc  ## I think we need all of them 
+from src.verbosity_printer import VerbosityPrinter
 
 def main():
     
+    ## Maybe convert these to argparse later
+    processed_images_dir = 'processed_images'
+    hyperparams_path = 'param/param.json'
+    ids_and_labels_path = 'ids_and_labels.csv'
+    N_features = 100
+    system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
+    
     ## this path can be made a variable/command line argument/json file parameter/etc later
     ## (or not)
-    processed_imgs_list = os.listdir("processed_images") 
+    processed_imgs_list = os.listdir(processed_images_dir) 
 
     ## Import hyperparameters from .json
-    with open('param/param.json') as paramfile: ## could make the path a command line argument
+    with open(hyperparams_path) as paramfile: ## could make the path a command line argument
         param = json.load(paramfile)
 
     ## added a couple others here/in the json
@@ -41,22 +49,27 @@ def main():
     train_end_index = param['train_end_index'] ## moved this to param.json
     train_names = processed_imgs_list[0:train_end_index]
     test_names = processed_imgs_list[train_end_index:]
-
         
     ## read in our labels
-    ids_and_labels = pd.read_csv('ids_and_labels.csv') 
+    ids_and_labels = pd.read_csv(ids_and_labels_path) 
+    
+    # Initialize the verbosity printer
+    vprinter = VerbosityPrinter(system_verbosity)
 
-    ## get a (global) mean image vector, and big cov. matrix, PCA matrix
-    ## this will probably take a minute to run
-    proc_path = 'processed_images'
-    mean_vector = dc.mean_image_vec(proc_path)                          ## mean flattened vector of whole dataset
-    print("mean vector acquired")
+    # ## get a (global) mean image vector, and big cov. matrix, PCA matrix
+    # ## this will probably take a minute to run
+    # mean_vector = dc.mean_image_vec(processed_images_dir)                          ## mean flattened vector of whole dataset
+    # vprinter.vprint("mean vector acquired", 2)
 
-    thetas_mat = dc.matrix_of_thetas(mean_vector, proc_path)            ## matrix of thetas for whole dataset
-    print("thetas matrix acquired")
+    # thetas_mat = dc.matrix_of_thetas(mean_vector, processed_images_dir)            ## matrix of thetas for whole dataset
+    # vprinter.vprint("thetas matrix acquired", 2)
 
-    PCA_matrix = dc.mat_of_thetas_to_pcs(thetas_mat, feature_size)      ## matrix of big C's principle components
-    print("PCA matrix acquired")
+    # PCA_matrix = dc.mat_of_thetas_to_pcs(thetas_mat, feature_size)      ## matrix of big C's principle components
+    # vprinter.vprint("PCA matrix acquired", 2)
+    
+    # Compress and label the processed dataset
+    galaxies_dataset = GalaxiesDataset(processed_images_dir, ids_and_labels_path, N_features, vprinter)
+    0
 
     ## we can e.g. construct a numpy array with all of our dataset's feature vectors
         ## each row = feature vector
@@ -66,7 +79,7 @@ def main():
     feature_array = np.zeros((len(ids_and_labels), feature_size), float) ## or int? see what pytorch inevitably complains about 
 
     for k in range(len(processed_imgs_list)): 
-        processed_fname = f'{proc_path}/{ids_and_labels.ID[k]}.jpg'
+        processed_fname = f'{processed_images_dir}/{ids_and_labels.ID[k]}.jpg'
         current_flat_img = dc.flattener(processed_fname)
         current_feature_vec = dc.feature_extract(PCA_matrix, current_flat_img, mean_vector)
         
@@ -76,7 +89,7 @@ def main():
     ## NOTE: (Skye) either the last few images are indistinguishable from the mean image, or I implemented PCA wrong. I'll look into this soon.   
     ## NOTE: Probably the latter, just checked the last two images, and they look different from each other.
     ## This^ problem has been resolved. I was only adding feature vectors up to the end of the training data, excluded the test data LOL
-    print(feature_array[-1,:])
+    vprinter.vprint(feature_array[-1,:], 2)
     
     ## split the feature vectors of each galaxy into training and testing sets
     train_features_np = feature_array[0:train_end_index,:]
@@ -180,8 +193,8 @@ def main():
             
     
     ## training loss plot
-    # print(type(loss_list[0]))
-    # print(type(range(epochs)))
+    # vprinter.vprint(type(loss_list[0]), 2)
+    # vprinter.vprint(type(range(epochs)), 2)
     plt.plot(loss_list)
     plt.title('Training loss')
     plt.ylabel('loss value')
@@ -195,7 +208,7 @@ def main():
     test_labels = torch.from_numpy(class_labels[train_end_index:])
     test_loss = loss(test_output, test_labels)
     
-    print(f'TEST DATA LOSS: {test_loss}')
+    vprinter.vprint(f'TEST DATA LOSS: {test_loss}')
     
     
 if __name__ == '__main__':
