@@ -62,8 +62,8 @@ def main():
             shutil.move(f'{processed_images_dir}/{fname}', f'{test_dir}/{fname}')
             
         
-    ## read in our labels
-    ids_and_labels = pd.read_csv(ids_and_labels_path) 
+    # ## read in our labels
+    # ids_and_labels = pd.read_csv(ids_and_labels_path) 
     
     # Initialize the verbosity printer
     vprinter = VerbosityPrinter(system_verbosity)
@@ -102,6 +102,16 @@ def main():
         train_loss_list.append(train_loss_val)
         test_loss_list.append(test_loss_val)
     
+    ## Finally, test data
+    ## can do it all as one big batch 
+    test_loss = model.test(galaxies_data = test_dataset,
+                            loss_fn = loss,
+                            vprinter = vprinter,
+                            batch_size = len(test_dataset),
+                            show_accuracy = True
+                            )    
+    vprinter.vprint(f'TEST DATA LOSS: {test_loss}')
+    
     ## training loss plot
     plt.plot(train_loss_list, label = 'Train Loss')
     plt.plot(test_loss_list, label = 'Test Loss')
@@ -115,16 +125,7 @@ def main():
     plt.xlim(1, epochs)
     plt.savefig('loss_plots.pdf')
     plt.show()
-    
-    ## Finally, test data
-    ## can do it all as one big batch 
-    test_loss = model.test(galaxies_data = test_dataset,
-                            loss_fn = loss,
-                            vprinter = vprinter,
-                            batch_size = batch,
-                            show_accuracy = True
-                            )    
-    vprinter.vprint(f'TEST DATA LOSS: {test_loss}')
+    0
     
 if __name__ == '__main__':
     main()

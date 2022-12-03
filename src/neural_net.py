@@ -123,6 +123,7 @@ class GalaxiesDataset(Dataset):
             current_flat_img = dc.flattener(processed_fname)
             current_feature_vec = dc.feature_extract(PCA_matrix, current_flat_img, mean_vector)
             feature_array[k,:] += current_feature_vec
+        self.vprinter.vprint('\n', 1)
             
         # And finally, label each image
         class_labels = np.zeros(len(processed_imgs_list), dtype=np.int64) ## according to my (Ben) A2, pytorch is expecting int64 for loss function
@@ -306,10 +307,9 @@ class Net(nn.Module):
                 pred = self(X)
                 test_loss += loss_fn(pred, y).item()
                 correct += (pred.argmax(1) == y).type(torch.float).sum().item()
-
+        test_loss /= num_batches
         
         if show_accuracy:        
-            test_loss /= num_batches
             correct /= size
             vprinter.vprint(f"Test Results: \n Test Accuracy: {(100*correct):>0.1f}% \t Test Loss: {test_loss:>8f} \n",
                     msg_verbosity = 0)
