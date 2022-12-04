@@ -110,7 +110,7 @@ def main():
                             batch_size = len(test_dataset),
                             show_accuracy = True
                             )    
-    test_dataset.save_eigengalaxies('sandbox/outputs')
+    # test_dataset.save_eigengalaxies('sandbox/outputs')
     vprinter.vprint(f'TEST DATA LOSS: {test_loss}')
     
     ## training loss plot
