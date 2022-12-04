@@ -60,6 +60,7 @@ class GalaxiesDataset(Dataset):
         
         # Process and label the data      
         self.img_source_path_list = os.listdir(self.processed_images_dir)
+        self.train_dataset = train_dataset
         if train_dataset is None:
             labelled_data = self.compress_and_label_data()
         else:
@@ -89,7 +90,21 @@ class GalaxiesDataset(Dataset):
         PCA_matrix = dc.mat_of_thetas_to_pcs(thetas_mat, self.feature_size)    ## matrix of big C's principle components
         self.vprinter.vprint("PCA matrix acquired",2)
         return PCA_matrix
-        
+    
+    def save_eigengalaxies(self: Dataset, output_dir: str):
+        '''
+        Saves all the eigengalaxies stored in PC_mat to the output_dir
+
+        Args:
+            self (GalaxiesDataset): The object representing our dataset of galaxies
+            output_dir (str): The directory to output all the images
+        '''
+        if self.train_dataset is None:
+            PC_mat = self.compute_PCA_matrix(self.mean_vector)
+        else:
+            PC_mat = self.train_dataset.compute_PCA_matrix(self.mean_vector)
+        dc.save_eigengalaxies(PC_mat, output_dir)
+            
     def compress_and_label_data(self: Dataset, train_dataset: Dataset = None) -> dict:
         '''
         Represents the data using a small feature vector obtained from performing PCA on the dataset
