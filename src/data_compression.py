@@ -73,6 +73,7 @@ def show_img_arr(img_arr: NDArray, output_path: str = None, show_img: bool = Tru
         plt.imsave(output_path, img_arr, cmap = 'gray')
     if show_img:
         plt.show()
+    plt.close()
 
 def mean_image_vec(path_to_images: str) -> NDArray:
     '''
@@ -242,6 +243,8 @@ def save_eigengalaxies(PC_mat: NDArray, output_dir: str):
         output_dir (str): The directory to output all the images
     '''
     n_vecs = PC_mat.shape[1]
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     for i in range(n_vecs):
         show_img_arr(unflattener(PC_mat[:,i]), f'{output_dir}/eigengalaxy_{i}.png', False)
 
@@ -260,6 +263,4 @@ if __name__ == '__main__':
     # uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, mean_vector, display_img=True)
     
     out_path = 'sandbox/outputs'
-    if not os.path.exists(out_path):
-        os.makedirs(out_path)
     save_eigengalaxies(PCA_matrix, out_path)
