@@ -1,4 +1,4 @@
-import sdss
+import sdss # https://github.com/behrouzz/sdss
 import numpy as np
 import cv2
 import pandas as pd
