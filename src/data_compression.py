@@ -9,9 +9,10 @@ from typing import Tuple
 from datetime import datetime as dt
 import scipy as sp
 
-# from src.image_analysis import normalize_binary_image
-from src.image_analysis import normalize_binary_image, unnormalize_binary_image
-from src.verbosity_printer import VerbosityPrinter
+import sys
+sys.path.append('src')
+from image_analysis import normalize_binary_image, unnormalize_binary_image
+from verbosity_printer import VerbosityPrinter
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -246,16 +247,19 @@ def save_eigengalaxies(PC_mat: NDArray, output_dir: str):
 
 if __name__ == '__main__':
     
-    proc_path = os.path.abspath('./processed_images')
+    proc_path = os.path.abspath('./processed_images/train')
     feature_size = 8
     mean_vector = mean_image_vec(proc_path)   
     thetas_mat = matrix_of_thetas(mean_vector, proc_path) 
     PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size, 'sklearn')
     
-    mean_vector = mean_image_vec(proc_path)   
-    processed_fname = f'{proc_path}/1237661968495935570.jpg'
-    current_flat_img = flattener(processed_fname)
-    current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
-    uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, mean_vector, display_img=True)
+    # mean_vector = mean_image_vec(proc_path)   
+    # processed_fname = f'{proc_path}/1237661968495935570.jpg'
+    # current_flat_img = flattener(processed_fname)
+    # current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
+    # uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, mean_vector, display_img=True)
     
-    save_eigengalaxies(PCA_matrix, 'sandbox/outputs')
+    out_path = 'sandbox/outputs'
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+    save_eigengalaxies(PCA_matrix, out_path)
