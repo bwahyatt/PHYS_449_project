@@ -30,6 +30,19 @@ def binary_assign(path_to_img: str, threshold: int) -> NDArray:
     return bin_image
 
 
+def grayscale_img(path_to_img: str):
+    '''
+    Produces a greyscale image of a "raw" image from the dataset using OpenCV
+
+    Args:
+        path_to_img (str): Filepath to the image
+    '''  
+    img = cv2.imread(path_to_img)
+    grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return grayscale
+
+
+
 def centre_row_col(bin_img_array: NDArray) -> Tuple[int]: 
     '''
     Calculate moments of binary image
