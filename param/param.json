@@ -1,12 +1,12 @@
 {
     "optim": {
-        "epochs": 600,
+        "epochs": 1000,
         "learn_rate": 8e-4,
         "binary_threshold": 90
     },
     "model": {
         "hidden_nodes": 50,
-        "feature_size": 100,
+        "feature_size": 8,
         "batch": 75,
         "train_end_index": 293
     },
