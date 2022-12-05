@@ -53,3 +53,10 @@ pip install -r requirements.txt
 
 ### sdss package credits
 The "sdss" folder in our "src" folder comes from the "sdss" package created by Behrouz Safari (https://github.com/behrouzz/sdss). Used under an MIT open source license 
+
+## Running `main.py`
+
+To run main.py, simply paste this in the command line and hit enter:
+```
+python main.py
+```
