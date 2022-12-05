@@ -71,9 +71,10 @@ def show_img_arr(img_arr: NDArray, output_path: str = None, show_img: bool = Tru
         plt.title(title)
     if output_path is not None:
         plt.imsave(output_path, img_arr, cmap = 'gray')
+        if not show_img:
+            plt.close()
     if show_img:
         plt.show()
-    plt.close()
 
 def mean_image_vec(path_to_images: str) -> NDArray:
     '''

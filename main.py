@@ -130,7 +130,10 @@ def main():
     plt.grid(True, which = 'major', color = 'darkgrey')
     plt.grid(True, which = 'minor', color = 'lightgrey')
     plt.xlim(1, epochs)
-    plt.savefig('loss_plots.pdf')
+    try:
+        plt.savefig('loss_plots.pdf')
+    except PermissionError:
+        vprinter.vprint("Error, unable to save loss plot file. Likely causes:\n- You have the pdf opened in another program\n- Not enough space in disk\n- You tried to save it in a folder with insufficient permissions",0)
     plt.show()
     0
     
