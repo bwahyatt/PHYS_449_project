@@ -67,7 +67,7 @@ def main():
         theta_rotate_angle = theta_angle(C_2x2)
         rotated_grayscale_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
         rotated_bin_image_array = rotate(normd_bin_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
-        processed_image = crop(rotated_image_array, final_shape)
+        processed_image = crop(rotated_grayscale_image_array, final_shape)
         
         # Unnormalize the processed image
         processed_image = unnormalize_binary_image(processed_image)
