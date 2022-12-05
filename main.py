@@ -29,7 +29,6 @@ def main():
     ## this path can be made a variable/command line argument/json file parameter/etc later
     ## (or not)
     # processed_imgs_list = os.listdir(processed_images_dir) 
-    processed_imgs_list = [f for f in os.listdir(processed_images_dir) if os.path.isfile(os.path.join(processed_images_dir, f))]
 
     ## Import hyperparameters from .json
     with open(hyperparams_path) as paramfile: ## could make the path a command line argument
@@ -49,13 +48,25 @@ def main():
     ## index for the cutoff of our training vs test data
     ## e.g. training data (file names) = processed_imgs[0:train_end_index], test data = processed_imgs[train_end_index:]
     ## this index can be made a "   "   "   "  "   "   "   " " " " " " " " " " " " " " 
+    
     train_dir = f'{processed_images_dir}/train'
+    test_dir = f'{processed_images_dir}/test'
+    
+    # Create directories if they're missing, if images have already been partitioned, then unpartition them 
     if not os.path.exists(train_dir):
         os.mkdir(train_dir)
-    test_dir = f'{processed_images_dir}/test'
+    else:
+        for fname in os.listdir(train_dir):
+            shutil.move(f'{train_dir}/{fname}', f'{processed_images_dir}/{fname}')
     if not os.path.exists(test_dir):
         os.mkdir(test_dir)
+    else:
+        for fname in os.listdir(test_dir):
+            shutil.move(f'{test_dir}/{fname}', f'{processed_images_dir}/{fname}')
+    
+    # Partition our images into a training dataset and a testing dataset
     train_end_index = param['model']['train_end_index'] ## moved this to param.json
+    processed_imgs_list = [f for f in os.listdir(processed_images_dir) if os.path.isfile(os.path.join(processed_images_dir, f))]
     for i, fname in enumerate(processed_imgs_list):
         if i <= train_end_index:
             shutil.move(f'{processed_images_dir}/{fname}', f'{train_dir}/{fname}')
