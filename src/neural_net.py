@@ -22,6 +22,8 @@ class GalaxiesDataset(Dataset):
                  processed_images_dir: str, 
                  ids_and_labels_path: str, 
                  feature_size: int, 
+                 class_label_mapping: dict,
+                 class_col: str,
                  train_dataset: Dataset = None, 
                  vprinter: VerbosityPrinter = None, 
                  transform = None, 
@@ -34,6 +36,8 @@ class GalaxiesDataset(Dataset):
             processed_images_dir (str): Directory to the processed images
             ids_and_labels_path (str): File path to the ids and labels .csv file
             feature_size (int): The number of feature vectors to use to represent the data
+            class_label_mapping (dict): The mapping between our galaxy classifications and PyTorch labels
+            class_col (str): The column from ids_and_labels that provides our classfication labels
             train_dataset (GalaxiesDataset): If we are constructing a training dataset, leave this parameter empty. If we are constructing a testing dataset, pass the training dataset into this parameter so that the testing dataset knows what the mean image and PCA matricies are
             vprinter (VerbosityPrinter): Object that handles verbosity printing
             transform (function, optional): A transformation function to apply to the image data. Defaults to None.
@@ -43,6 +47,8 @@ class GalaxiesDataset(Dataset):
             vprinter (VerbosityPrinter): Object that handles verbosity printing
             ids_and_labels_path (str): File path to the ids and labels .csv file
             feature_size (int): The number of feature vectors to use to represent the data
+            class_label_mapping (dict): The mapping between our galaxy classifications and PyTorch labels
+            class_col (str): The column from ids_and_labels that provides our classfication labels
             img_source_path_list (str): List of all images
             mean_vector (NDArray): The mean image of the dataset
             feature_array (NDArray): The features of each image
@@ -56,8 +62,10 @@ class GalaxiesDataset(Dataset):
             
         self.processed_images_dir = processed_images_dir 
         self.ids_and_labels_path = ids_and_labels_path
-        self.feature_size = feature_size  
-        
+        self._feature_size = feature_size  
+        self._class_label_mapping = class_label_mapping  
+        self._class_col = class_col  
+                
         # Process and label the data      
         self.img_source_path_list = os.listdir(self.processed_images_dir)
         self.train_dataset = train_dataset
@@ -73,7 +81,7 @@ class GalaxiesDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         
-    def compute_PCA_matrix(self: Dataset, mean_vector: NDArray) -> NDArray:
+    def __compute_PCA_matrix(self: Dataset, mean_vector: NDArray) -> NDArray:
         '''
         The PCA matrix is huge, 
         so it's best to compute it whenever we need it as opposed to storing it as an attribute
@@ -87,7 +95,7 @@ class GalaxiesDataset(Dataset):
         '''
         thetas_mat = dc.matrix_of_thetas(mean_vector, self.processed_images_dir) ## matrix of thetas for whole dataset
         self.vprinter.vprint("theta vector acquired",2)
-        PCA_matrix = dc.mat_of_thetas_to_pcs(thetas_mat, self.feature_size)    ## matrix of big C's principle components
+        PCA_matrix = dc.mat_of_thetas_to_pcs(thetas_mat, self._feature_size)    ## matrix of big C's principle components
         self.vprinter.vprint("PCA matrix acquired",2)
         return PCA_matrix
     
@@ -100,9 +108,9 @@ class GalaxiesDataset(Dataset):
             output_dir (str): The directory to output all the images
         '''
         if self.train_dataset is None:
-            PC_mat = self.compute_PCA_matrix(self.mean_vector)
+            PC_mat = self.__compute_PCA_matrix(self.mean_vector)
         else:
-            PC_mat = self.train_dataset.compute_PCA_matrix(self.mean_vector)
+            PC_mat = self.train_dataset.__compute_PCA_matrix(self.mean_vector)
         dc.save_eigengalaxies(PC_mat, output_dir)
             
     def compress_and_label_data(self: Dataset, train_dataset: Dataset = None) -> dict:
@@ -124,15 +132,15 @@ class GalaxiesDataset(Dataset):
         if train_dataset is None:
             mean_vector = dc.mean_image_vec(self.processed_images_dir)
             self.vprinter.vprint("mean vector acquired",2)
-            PCA_matrix = self.compute_PCA_matrix(mean_vector)  
+            PCA_matrix = self.__compute_PCA_matrix(mean_vector)  
         else:
             mean_vector = train_dataset.mean_vector
-            PCA_matrix = train_dataset.compute_PCA_matrix(mean_vector)
+            PCA_matrix = train_dataset.__compute_PCA_matrix(mean_vector)
         
         # Create feature vectors for each image
         processed_imgs_list = self.img_source_path_list
         ids_and_labels = pd.read_csv(self.ids_and_labels_path, index_col='ID')
-        feature_array = np.zeros((len(ids_and_labels), self.feature_size), dtype = 'float32') 
+        feature_array = np.zeros((len(ids_and_labels), self._feature_size), dtype = 'float32') 
         for k in tqdm(range(len(processed_imgs_list)), desc = "Creating feature vectors for each image", disable = self.vprinter.system_verbosity == 0): 
             processed_fname = f'{self.processed_images_dir}/{processed_imgs_list[k]}'
             current_flat_img = dc.flattener(processed_fname)
@@ -156,12 +164,11 @@ class GalaxiesDataset(Dataset):
             
             ## is this how indexing in Pandas works?
             ## i.e. will it recognize that underscore even though the original csv column is "Simple Classification" with a space?
-            if ids_and_labels['Simple Classification'][int(processed_imgs_list[k][:-4])] == 'E':
-                class_labels[k] = 1
-            elif ids_and_labels['Simple Classification'][int(processed_imgs_list[k][:-4])] == 'S':
-                continue
-            else:
-                raise ValueError("your ad hoc label thing needs more classes")
+            clasification = ids_and_labels[self._class_col][int(processed_imgs_list[k][:-4])]
+            try:
+                class_labels[k] = self._class_label_mapping[clasification]
+            except KeyError:
+                raise KeyError(f"Classification unrecognized. Either add {clasification} to the `class_label_mapping` dict in our params file, or remove this class from the dataset.")
         
         
         labelled_data = {
@@ -178,7 +185,7 @@ class GalaxiesDataset(Dataset):
         Args:
             index (int): The index to use to access a specific image from our dataset
         '''
-        dc.uncompress_img(self.compute_PCA_matrix(self.mean_vector), self[index][0], self.mean_vector, display_img = True)
+        dc.uncompress_img(self.__compute_PCA_matrix(self.mean_vector), self[index][0], self.mean_vector, display_img = True)
         
     def __len__(self):
         return len(self.class_labels)

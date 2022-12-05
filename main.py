@@ -23,7 +23,7 @@ def main():
     ## Maybe convert these to argparse later
     processed_images_dir = 'processed_images'
     hyperparams_path = 'param/param.json'
-    ids_and_labels_path = 'ids_and_labels.csv'
+    ids_and_labels_path = 'specific_ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
     ## this path can be made a variable/command line argument/json file parameter/etc later
@@ -36,14 +36,15 @@ def main():
         param = json.load(paramfile)
 
     ## added a couple others here/in the json
-    num_class = param['num_class']
-    batch = param['batch']
-    epochs = param['epochs']
-    learn_rate = param['learn_rate']
-    hidden_nodes = param['hidden_nodes'] ## or whatever "third of the input size" the authors use
-    feature_size = param['feature_size'] ## or 13 or 25 or whatever we want. But, it is something we have to pick by hand
+    batch = param['model']['batch']
+    epochs = param['optim']['epochs']
+    learn_rate = param['optim']['learn_rate']
+    hidden_nodes = param['model']['hidden_nodes'] ## or whatever "third of the input size" the authors use
+    feature_size = param['model']['feature_size'] ## or 13 or 25 or whatever we want. But, it is something we have to pick by hand
                                             ## to recreate paper, we will probably need to try all 3 author values?
-        
+    class_label_mapping = param['class_label_mapping']    
+    num_class = len(class_label_mapping)
+    
     ## Separate our testing and training data using a cutoff index
     ## index for the cutoff of our training vs test data
     ## e.g. training data (file names) = processed_imgs[0:train_end_index], test data = processed_imgs[train_end_index:]
@@ -54,7 +55,7 @@ def main():
     test_dir = f'{processed_images_dir}/test'
     if not os.path.exists(test_dir):
         os.mkdir(test_dir)
-    train_end_index = param['train_end_index'] ## moved this to param.json
+    train_end_index = param['model']['train_end_index'] ## moved this to param.json
     for i, fname in enumerate(processed_imgs_list):
         if i <= train_end_index:
             shutil.move(f'{processed_images_dir}/{fname}', f'{train_dir}/{fname}')
@@ -69,15 +70,20 @@ def main():
     vprinter = VerbosityPrinter(system_verbosity)
     
     # Compress and label the processed dataset
+    class_col = 'Simple Classification'
     vprinter.vprint("Processing training data:", 1)
     train_dataset = GalaxiesDataset(processed_images_dir = train_dir, 
                                     ids_and_labels_path = ids_and_labels_path, 
                                     feature_size = feature_size, 
+                                    class_label_mapping = class_label_mapping,
+                                    class_col = class_col,
                                     vprinter = vprinter)
     vprinter.vprint("Processing testing data:", 1)
     test_dataset = GalaxiesDataset(processed_images_dir = test_dir, 
                                     ids_and_labels_path = ids_and_labels_path, 
                                     feature_size = feature_size, 
+                                    class_label_mapping = class_label_mapping,
+                                    class_col = class_col,
                                     vprinter = vprinter,                            
                                     train_dataset = train_dataset)
             

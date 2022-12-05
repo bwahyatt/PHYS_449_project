@@ -1,10 +1,20 @@
 {
-    "epochs": 600,
-    "learn_rate": 8e-4,
-    "hidden_nodes": 50,
-    "feature_size": 100,
-    "num_class": 2,
-    "batch": 75,
-    "train_end_index": 293,
-    "binary_threshold": 90
+    "optim": {
+        "epochs": 600,
+        "learn_rate": 8e-4,
+        "binary_threshold": 90
+    },
+    "model": {
+        "hidden_nodes": 50,
+        "feature_size": 100,
+        "batch": 75,
+        "train_end_index": 293
+    },
+    "class_label_mapping": {
+        "Sa": 0,
+        "S": 1,
+        "Sc": 2,
+        "Sb": 3,
+        "E": 4
+    }
 }
