@@ -29,7 +29,6 @@ def binary_assign(path_to_img: str, threshold: int) -> NDArray:
     
     return bin_image
 
-
 def grayscale_img(path_to_img: str):
     '''
     Produces a greyscale image of a "raw" image from the dataset using OpenCV

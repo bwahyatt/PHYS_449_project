@@ -56,13 +56,14 @@ def main():
     for n in tqdm(range(len(raw_img_names)), desc = 'Processing Images', disable = vprinter.system_verbosity == 0):
         # Import image as a grayscale array and normalize it
         
-        
+        bin_image_array = binary_assign(PATH_TO_RAW_IMAGES+raw_img_names[n], binary_threshold)
         gray_image_array = grayscale_img(PATH_TO_RAW_IMAGES+raw_img_names[n])
         normd_gray_img_arr = normalize_binary_image(gray_image_array) #the normalize_binary_image function works for grayscale too
+        normd_bin_image_array = normalize_binary_image(bin_image_array) #the normalize_binary_image function works for grayscale too
 
         # Perform the various image processing steps
-        i_bar, j_bar = centre_row_col(normd_gray_img_arr)
-        C_2x2 = small_cov_matrix(normd_gray_img_arr, i_bar, j_bar)
+        i_bar, j_bar = centre_row_col(normd_bin_image_array)
+        C_2x2 = small_cov_matrix(normd_bin_image_array, i_bar, j_bar)
         theta_rotate_angle = theta_angle(C_2x2)
         rotated_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
         processed_image = crop(rotated_image_array, final_shape)
