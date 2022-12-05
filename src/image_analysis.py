@@ -165,6 +165,22 @@ def rotate(image: NDArray, angle: float) -> NDArray:
     output = ndimage.rotate(image, angle_deg, reshape=False)
     return output
 
+def rem_back(bin_img, grayscale_img): # Remove background from grayscale image
+    blk_cols = [] 
+    for i in range(bin_img.shape[1]):
+        if (np.all(bin_img[:,i] == 0)):
+            blk_cols.append(i)
+
+    blk_rows = [] 
+    for j in range(bin_img.shape[0]):
+        if (np.all(bin_img[j,:] == 0)):
+            blk_rows.append(j)
+    
+    img = np.delete(grayscale_img, blk_cols, axis=1)
+    img = np.delete(grayscale_img, blk_rows, axis=0)
+
+    return img
+    
 def crop(img, shape):
     # img = array of the input image
     # shape = (int , int)
