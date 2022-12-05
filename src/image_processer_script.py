@@ -65,7 +65,8 @@ def main():
         i_bar, j_bar = centre_row_col(normd_bin_image_array)
         C_2x2 = small_cov_matrix(normd_bin_image_array, i_bar, j_bar)
         theta_rotate_angle = theta_angle(C_2x2)
-        rotated_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
+        rotated_grayscale_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
+        rotated_bin_image_array = rotate(normd_bin_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
         processed_image = crop(rotated_image_array, final_shape)
         
         # Unnormalize the processed image
