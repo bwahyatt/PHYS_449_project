@@ -24,7 +24,7 @@ def main():
     ## Maybe convert these to argparse later
     class_mode = 'multi'
     if class_mode == 'binary':
-        processed_images_dir = 'processed_images'
+        processed_images_dir = 'grayscale_images'
         hyperparams_path = './param/binary_param.json'
         ids_and_labels_path = 'ids_and_labels.csv'
     elif class_mode == 'multi':
@@ -138,7 +138,8 @@ def main():
                             loss_fn = loss,
                             vprinter = vprinter,
                             batch_size = len(test_dataset),
-                            show_accuracy = True
+                            show_accuracy = True,
+                            confusion_matrix_out_path = 'confusion_matrix.pdf'
                             )    
     # test_dataset.save_eigengalaxies('sandbox/outputs')
     vprinter.vprint(f'TEST DATA LOSS: {test_loss}')

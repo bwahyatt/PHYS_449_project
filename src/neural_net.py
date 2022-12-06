@@ -9,6 +9,9 @@ import pandas as pd
 from typing import List, Callable
 import os
 from tqdm import tqdm
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import matplotlib.pyplot as plt
 
 import src.data_compression as dc
 from src.verbosity_printer import VerbosityPrinter
@@ -314,7 +317,8 @@ class Net(nn.Module):
             vprinter: VerbosityPrinter = None,
             batch_size: int = 1,
             device: str = 'cpu',
-            show_accuracy: bool = False
+            show_accuracy: bool = False,
+            confusion_matrix_out_path: str = None
         ) -> float:
         '''
         Tests the model with a testing dataset
@@ -330,7 +334,12 @@ class Net(nn.Module):
         Returns:
             float: The loss value after training
         '''
+        # Initialize confusion matrix
+        classes = list(galaxies_data._class_label_mapping)
+        y_pred = []
+        y_true = []
         
+        # Test the model
         dataloader = DataLoader(galaxies_data, batch_size = batch_size)
         size = len(dataloader.dataset)
         num_batches = len(dataloader)
@@ -342,16 +351,32 @@ class Net(nn.Module):
                 pred = self(X)
                 if self.num_classes == 1:
                     test_loss += loss_fn(pred.reshape(-1), y.float()).item()
-                    correct += (pred.reshape(-1).round() == y).type(torch.float).sum().item()
+                    y_pred_batch = pred.reshape(-1).round()
                 else:
                     test_loss += loss_fn(pred, y).item()
-                    correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                    y_pred_batch = pred.argmax(1)
+                correct += (y_pred_batch == y).type(torch.float).sum().item()
+                y_pred.extend(y_pred_batch.tolist())
+                y_true.extend(y.tolist())
         test_loss /= num_batches
         
         if show_accuracy:        
             correct /= size
             vprinter.vprint(f"Test Results: \n Test Accuracy: {(100*correct):>0.1f}% \t Test Loss: {test_loss:>8f} \n",
                     msg_verbosity = 0)
+            
+        if confusion_matrix_out_path is not None:
+            cf_matrix = confusion_matrix(y_true, y_pred, labels = range(len(classes)))
+            df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes],
+                     columns = [i for i in classes])
+            plt.figure(figsize = (12,7))
+            sn.heatmap(df_cm, annot=True).set(title = f"Confusion Matrix N = {size}", xlabel = 'True Labels', ylabel = 'Predicted Labels')
+            try:
+                plt.savefig(confusion_matrix_out_path)
+            except PermissionError:
+                vprinter.vprint("Error, unable to save confusion matrix file. Likely causes:\n- You have the pdf opened in another program\n- Not enough space in disk\n- You tried to save it in a folder with insufficient permissions",0)
+    
+            plt.close()
         
         return test_loss
         
