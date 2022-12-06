@@ -100,6 +100,8 @@ def mean_image_vec(path_to_images: str) -> NDArray:
     mean_img = np.zeros(img_size,float)
 
     for img_name in all_imgs_list:
+        if img_name == '.DS_Store':
+            continue
         full_fname = path_to_images+'/'+img_name
         
         ## added the binary normalization in flattener
