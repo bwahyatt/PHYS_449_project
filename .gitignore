@@ -2,10 +2,13 @@
 *env/
 *__pycache__/
 *sandbox/
+*.ipynb_checkpoints/
 
 # File Extensions
 *.code-workspace
+*.pdf
 
 # Files
 *launch.json
 src/sdss_usage.py
+.DS_Store

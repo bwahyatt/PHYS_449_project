@@ -17,18 +17,25 @@ from tqdm import tqdm
 from src.neural_net import Net, GalaxiesDataset
 import src.data_compression as dc  ## I think we need all of them 
 from src.verbosity_printer import VerbosityPrinter
+from src.remove_rogue_files import list_dir
 
 def main():
     
     ## Maybe convert these to argparse later
-    processed_images_dir = 'processed_images'
-    hyperparams_path = 'param/param.json'
-    ids_and_labels_path = 'specific_ids_and_labels.csv'
+    class_mode = 'multi'
+    if class_mode == 'binary':
+        processed_images_dir = 'processed_images'
+        hyperparams_path = './param/binary_param.json'
+        ids_and_labels_path = 'ids_and_labels.csv'
+    elif class_mode == 'multi':
+        processed_images_dir = 'processed_images'
+        hyperparams_path = 'param/param.json'
+        ids_and_labels_path = 'specific_ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
     ## this path can be made a variable/command line argument/json file parameter/etc later
     ## (or not)
-    # processed_imgs_list = os.listdir(processed_images_dir) 
+    # processed_imgs_list = list_dir(processed_images_dir, '.DS_Store')
 
     ## Import hyperparameters from .json
     with open(hyperparams_path) as paramfile: ## could make the path a command line argument
@@ -43,6 +50,8 @@ def main():
                                             ## to recreate paper, we will probably need to try all 3 author values?
     class_label_mapping = param['class_label_mapping']    
     num_class = len(class_label_mapping)
+    if num_class == 2:
+        num_class = 1
     
     ## Separate our testing and training data using a cutoff index
     ## index for the cutoff of our training vs test data
@@ -56,17 +65,17 @@ def main():
     if not os.path.exists(train_dir):
         os.mkdir(train_dir)
     else:
-        for fname in os.listdir(train_dir):
+        for fname in list_dir(train_dir, '.DS_Store'):
             shutil.move(f'{train_dir}/{fname}', f'{processed_images_dir}/{fname}')
     if not os.path.exists(test_dir):
         os.mkdir(test_dir)
     else:
-        for fname in os.listdir(test_dir):
+        for fname in list_dir(test_dir, '.DS_Store'):
             shutil.move(f'{test_dir}/{fname}', f'{processed_images_dir}/{fname}')
     
     # Partition our images into a training dataset and a testing dataset
     train_end_index = param['model']['train_end_index'] ## moved this to param.json
-    processed_imgs_list = [f for f in os.listdir(processed_images_dir) if os.path.isfile(os.path.join(processed_images_dir, f))]
+    processed_imgs_list = [f for f in list_dir(processed_images_dir, '.DS_Store') if os.path.isfile(os.path.join(processed_images_dir, f))]
     for i, fname in enumerate(processed_imgs_list):
         if i <= train_end_index:
             shutil.move(f'{processed_images_dir}/{fname}', f'{train_dir}/{fname}')
@@ -101,7 +110,11 @@ def main():
     ## NN stuff - cf. Workshop 2 / assignment 2
     model = Net(feature_size, hidden_nodes, num_class)
     optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
-    loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+    if num_class == 1:
+        loss = nn.BCELoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+    else: 
+        loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+        
 
     train_loss_list = []    ## plot this after training
     test_loss_list = []    ## plot this after training

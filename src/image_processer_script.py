@@ -14,13 +14,14 @@ from verbosity_printer import VerbosityPrinter
 
 # sys.path.append('src')
 
-from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img
+from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img, rem_back
 from image_analysis import theta_angle, rotate, crop, normalize_binary_image, unnormalize_binary_image
+from src.remove_rogue_files import list_dir
 
 def import_raw_imgs(pdir: str) -> Tuple[str]:
     PATH_TO_RAW_IMAGES = f"{pdir}/raw_images/"    ## relative should work if this script is in 'src'
     PATH_TO_PROCESSED_IMAGES = f"{pdir}/grayscale_images/"    ## "  "  "  "  "  "
-    raw_img_names = os.listdir(PATH_TO_RAW_IMAGES) 
+    raw_img_names = list_dir(PATH_TO_RAW_IMAGES, '.DS_Store')
     return PATH_TO_RAW_IMAGES, PATH_TO_PROCESSED_IMAGES, raw_img_names
 
 def main():
@@ -67,14 +68,16 @@ def main():
         theta_rotate_angle = theta_angle(C_2x2)
         rotated_grayscale_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
         rotated_bin_image_array = rotate(normd_bin_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
-        processed_image = crop(rotated_grayscale_image_array, final_shape)
+        rem_cols_grayscale = rem_back(rotated_bin_image_array, rotated_grayscale_image_array)
+        processed_image = crop(rem_cols_grayscale, final_shape)
         
         # Unnormalize the processed image
         processed_image = unnormalize_binary_image(processed_image)
+        processed_image = processed_image.astype(int)
         
         ## dropping the '.jpg' from the string, looks like cv2 takes care of it
         ## our processed images end with .jpg.jpg
-        cv2.imwrite(f'{pdir}/grayscale_images/{raw_img_names[n]}', processed_image)
+        cv2.imwrite(f'{pdir}/processed_images/{raw_img_names[n]}', processed_image)
         ## rotate, rescale, save array as a processed image to new folder
 
 if __name__ == '__main__':
