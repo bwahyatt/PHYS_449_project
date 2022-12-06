@@ -13,6 +13,7 @@ import sys
 sys.path.append('src')
 from image_analysis import normalize_binary_image, unnormalize_binary_image
 from verbosity_printer import VerbosityPrinter
+from src.remove_rogue_files import list_dir
 
 def flattener(path_to_image: str) -> NDArray:
     '''
@@ -89,10 +90,13 @@ def mean_image_vec(path_to_images: str) -> NDArray:
         NDArray: The average flattened image vector of the whole processed dataset
     '''
 
-    all_imgs_list = os.listdir(path_to_images)
+    all_imgs_list = list_dir(path_to_images, '.DS_Store')
+    if all_imgs_list[0] == '.DS_Store':
+        all_imgs_list.pop(0)
 
     ## get the size of the binary images (they should all be the same size)
         ## this fname string might be off.. 
+    
     dummy_img = cv2.imread(path_to_images+'/'+all_imgs_list[0], 0)
 
     ## just the 1D size of the processed images
@@ -128,7 +132,7 @@ def matrix_of_thetas(mean_img: NDArray, path_to_images: str) -> NDArray:
     '''
     
     ## list of all the processed image names, like the above function
-    all_imgs_list = os.listdir(path_to_images)
+    all_imgs_list = list_dir(path_to_images, '.DS_Store')
 
     ## this matrix has columns that are "theta" vectors
         ## num rows = size of these flattened image vectors

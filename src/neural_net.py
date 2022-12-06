@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 import src.data_compression as dc
 from src.verbosity_printer import VerbosityPrinter
+from src.remove_rogue_files import list_dir
 
 class GalaxiesDataset(Dataset):
     '''
@@ -67,7 +68,7 @@ class GalaxiesDataset(Dataset):
         self._class_col = class_col  
                 
         # Process and label the data      
-        self.img_source_path_list = os.listdir(self.processed_images_dir)
+        self.img_source_path_list = list_dir(self.processed_images_dir, '.DS_Store')
         self.train_dataset = train_dataset
         if train_dataset is None:
             labelled_data = self.compress_and_label_data()

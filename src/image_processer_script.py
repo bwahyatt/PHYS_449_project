@@ -16,11 +16,12 @@ from verbosity_printer import VerbosityPrinter
 
 from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img, rem_back
 from image_analysis import theta_angle, rotate, crop, normalize_binary_image, unnormalize_binary_image
+from src.remove_rogue_files import list_dir
 
 def import_raw_imgs(pdir: str) -> Tuple[str]:
     PATH_TO_RAW_IMAGES = f"{pdir}/raw_images/"    ## relative should work if this script is in 'src'
-    PATH_TO_PROCESSED_IMAGES = f"{pdir}/processed_images/"    ## "  "  "  "  "  "
-    raw_img_names = os.listdir(PATH_TO_RAW_IMAGES) 
+    PATH_TO_PROCESSED_IMAGES = f"{pdir}/grayscale_images/"    ## "  "  "  "  "  "
+    raw_img_names = list_dir(PATH_TO_RAW_IMAGES, '.DS_Store')
     return PATH_TO_RAW_IMAGES, PATH_TO_PROCESSED_IMAGES, raw_img_names
 
 def main():
