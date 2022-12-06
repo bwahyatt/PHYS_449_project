@@ -367,10 +367,10 @@ class Net(nn.Module):
             
         if confusion_matrix_out_path is not None:
             cf_matrix = confusion_matrix(y_true, y_pred, labels = range(len(classes)))
-            df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes],
+            df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix), index = [i for i in classes],
                      columns = [i for i in classes])
             plt.figure(figsize = (12,7))
-            sn.heatmap(df_cm, annot=True).set(title = f"Confusion Matrix N = {size}", xlabel = 'True Labels', ylabel = 'Predicted Labels')
+            sn.heatmap(df_cm, annot=True).set(title = f"Confusion Matrix N = {size}", ylabel = 'True Labels', xlabel = 'Predicted Labels')
             try:
                 plt.savefig(confusion_matrix_out_path)
             except PermissionError:

@@ -28,7 +28,7 @@ def main():
         hyperparams_path = './param/binary_param.json'
         ids_and_labels_path = 'ids_and_labels.csv'
     elif class_mode == 'multi':
-        processed_images_dir = 'processed_images'
+        processed_images_dir = 'grayscale_images'
         hyperparams_path = 'param/param.json'
         ids_and_labels_path = 'specific_ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
@@ -60,6 +60,7 @@ def main():
     
     train_dir = f'{processed_images_dir}/train'
     test_dir = f'{processed_images_dir}/test'
+    all_data_dir = f'{processed_images_dir}/all'
     
     # Create directories if they're missing, if images have already been partitioned, then unpartition them 
     if not os.path.exists(train_dir):
@@ -72,6 +73,7 @@ def main():
     else:
         for fname in list_dir(test_dir, '.DS_Store'):
             shutil.move(f'{test_dir}/{fname}', f'{processed_images_dir}/{fname}')
+    shutil.copytree(processed_images_dir, all_data_dir, ignore = shutil.ignore_patterns('train*', 'test*', 'all*'), dirs_exist_ok = True)
     
     # Partition our images into a training dataset and a testing dataset
     train_end_index = param['model']['train_end_index'] ## moved this to param.json

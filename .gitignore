@@ -3,6 +3,7 @@
 *__pycache__/
 *sandbox/
 *.ipynb_checkpoints/
+all/
 
 # File Extensions
 *.code-workspace
