@@ -17,6 +17,7 @@ from tqdm import tqdm
 from src.neural_net import Net, GalaxiesDataset
 import src.data_compression as dc  ## I think we need all of them 
 from src.verbosity_printer import VerbosityPrinter
+from src.remove_rogue_files import list_dir
 
 def main():
     
@@ -28,7 +29,7 @@ def main():
     
     ## this path can be made a variable/command line argument/json file parameter/etc later
     ## (or not)
-    # processed_imgs_list = os.listdir(processed_images_dir) 
+    # processed_imgs_list = list_dir(processed_images_dir, '.DS_Store')
 
     ## Import hyperparameters from .json
     with open(hyperparams_path) as paramfile: ## could make the path a command line argument
@@ -56,17 +57,17 @@ def main():
     if not os.path.exists(train_dir):
         os.mkdir(train_dir)
     else:
-        for fname in os.listdir(train_dir):
+        for fname in list_dir(train_dir, '.DS_Store'):
             shutil.move(f'{train_dir}/{fname}', f'{processed_images_dir}/{fname}')
     if not os.path.exists(test_dir):
         os.mkdir(test_dir)
     else:
-        for fname in os.listdir(test_dir):
+        for fname in list_dir(test_dir, '.DS_Store'):
             shutil.move(f'{test_dir}/{fname}', f'{processed_images_dir}/{fname}')
     
     # Partition our images into a training dataset and a testing dataset
     train_end_index = param['model']['train_end_index'] ## moved this to param.json
-    processed_imgs_list = [f for f in os.listdir(processed_images_dir) if os.path.isfile(os.path.join(processed_images_dir, f))]
+    processed_imgs_list = [f for f in list_dir(processed_images_dir, '.DS_Store') if os.path.isfile(os.path.join(processed_images_dir, f))]
     for i, fname in enumerate(processed_imgs_list):
         if i <= train_end_index:
             shutil.move(f'{processed_images_dir}/{fname}', f'{train_dir}/{fname}')
