@@ -33,7 +33,7 @@ def main():
     ## we should make a separate folder with all of the processed, binary images too (see below)
         ## see "processed_images"
 
-    with open('param/param.json') as fp:
+    with open('/Users/ahmedlahiouel/Desktop/4A/Physics 449/PHYS_449_project/param/param.json') as fp:
         params = json.load(fp)
         
     ## some number for assigning binary image pixel values
@@ -72,6 +72,7 @@ def main():
         
         # Unnormalize the processed image
         processed_image = unnormalize_binary_image(processed_image)
+        processed_image = processed_image.astype(int)
         
         ## dropping the '.jpg' from the string, looks like cv2 takes care of it
         ## our processed images end with .jpg.jpg
