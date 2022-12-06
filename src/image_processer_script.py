@@ -19,7 +19,7 @@ from image_analysis import theta_angle, rotate, crop, normalize_binary_image, un
 
 def import_raw_imgs(pdir: str) -> Tuple[str]:
     PATH_TO_RAW_IMAGES = f"{pdir}/raw_images/"    ## relative should work if this script is in 'src'
-    PATH_TO_PROCESSED_IMAGES = f"{pdir}/grayscale_images/"    ## "  "  "  "  "  "
+    PATH_TO_PROCESSED_IMAGES = f"{pdir}/processed_images/"    ## "  "  "  "  "  "
     raw_img_names = os.listdir(PATH_TO_RAW_IMAGES) 
     return PATH_TO_RAW_IMAGES, PATH_TO_PROCESSED_IMAGES, raw_img_names
 
@@ -76,7 +76,7 @@ def main():
         
         ## dropping the '.jpg' from the string, looks like cv2 takes care of it
         ## our processed images end with .jpg.jpg
-        cv2.imwrite(f'{pdir}/grayscale_images/{raw_img_names[n]}', processed_image)
+        cv2.imwrite(f'{pdir}/processed_images/{raw_img_names[n]}', processed_image)
         ## rotate, rescale, save array as a processed image to new folder
 
 if __name__ == '__main__':

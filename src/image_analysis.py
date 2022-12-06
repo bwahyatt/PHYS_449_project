@@ -177,16 +177,17 @@ def rem_back(bin_img, grayscale_img): # Remove background from grayscale image
         #if (np.all(bin_img[j,:] == 0)):
             #blk_rows.append(j)
     if (len(blk_cols) == bin_img.shape[1]):
-        return grayscale_img
+        return bin_img.astype(float)
     else:
-        grayscale_img = np.delete(grayscale_img, blk_cols, axis=1)
-        return grayscale_img
+        bin_img = np.delete(bin_img, blk_cols, axis=1)
+        return bin_img.astype(float)
     #img = np.delete(bin_img, blk_rows, axis=0)
     
 def crop(img, shape):
     # img = array of the input image
     # shape = (int , int)
-    crop = cv2.resize(img, dsize = shape, interpolation = cv2.INTER_CUBIC)
+    print(img.shape)
+    crop = cv2.resize(img, dsize = shape)
     return crop 
 
 

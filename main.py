@@ -21,8 +21,8 @@ from src.verbosity_printer import VerbosityPrinter
 def main():
     
     ## Maybe convert these to argparse later
-    processed_images_dir = 'grayscale_images'
-    hyperparams_path = 'param/param.json'
+    processed_images_dir = 'processed_images'
+    hyperparams_path = './param/param.json'
     ids_and_labels_path = 'ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
