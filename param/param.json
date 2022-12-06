@@ -11,10 +11,7 @@
         "train_end_index": 293
     },
     "class_label_mapping": {
-        "Sa": 0,
-        "S": 1,
-        "Sc": 2,
-        "Sb": 3,
-        "E": 4
+        "S": 0,
+        "E": 1
     }
 }

@@ -23,7 +23,7 @@ def main():
     ## Maybe convert these to argparse later
     processed_images_dir = 'processed_images'
     hyperparams_path = 'param/param.json'
-    ids_and_labels_path = 'specific_ids_and_labels.csv'
+    ids_and_labels_path = 'ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
     ## this path can be made a variable/command line argument/json file parameter/etc later
@@ -101,7 +101,7 @@ def main():
     ## NN stuff - cf. Workshop 2 / assignment 2
     model = Net(feature_size, hidden_nodes, num_class)
     optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
-    loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+    loss = nn.BCELoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
 
     train_loss_list = []    ## plot this after training
     test_loss_list = []    ## plot this after training

@@ -221,7 +221,7 @@ class Net(nn.Module):
         ## https://www.mathworks.com/help/deeplearning/ref/tansig.html
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
-        tan = nn.Tanh()
+        tan = nn.Sigmoid()
         h = tan(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
         y = self.fc2(h)
         
@@ -269,7 +269,7 @@ class Net(nn.Module):
 
             # Compute prediction error
             pred = self(X)
-            loss = loss_fn(pred, y)
+            loss = loss_fn(pred, y.reshape(-1))
 
             # Backpropagation
             optimizer.zero_grad()
@@ -327,7 +327,7 @@ class Net(nn.Module):
             for X, y in dataloader:
                 X, y = X.to(device), y.to(device)
                 pred = self(X)
-                test_loss += loss_fn(pred, y).item()
+                test_loss += loss_fn(pred.reshape(-1), y).item()
                 correct += (pred.argmax(1) == y).type(torch.float).sum().item()
         test_loss /= num_batches
         
