@@ -1,6 +1,6 @@
 {
     "optim": {
-        "epochs": 1000,
+        "epochs": 200,
         "learn_rate": 8e-4,
         "binary_threshold": 90
     },

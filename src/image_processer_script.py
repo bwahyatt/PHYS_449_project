@@ -14,7 +14,7 @@ from verbosity_printer import VerbosityPrinter
 
 # sys.path.append('src')
 
-from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img
+from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img, rem_back
 from image_analysis import theta_angle, rotate, crop, normalize_binary_image, unnormalize_binary_image
 
 def import_raw_imgs(pdir: str) -> Tuple[str]:
@@ -67,7 +67,8 @@ def main():
         theta_rotate_angle = theta_angle(C_2x2)
         rotated_grayscale_image_array = rotate(normd_gray_img_arr, theta_rotate_angle) ## this takes radian angle argument (I think)
         rotated_bin_image_array = rotate(normd_bin_image_array, theta_rotate_angle) ## this takes radian angle argument (I think)
-        processed_image = crop(rotated_grayscale_image_array, final_shape)
+        rem_cols_grayscale = rem_back(rotated_bin_image_array, rotated_grayscale_image_array)
+        processed_image = crop(rem_cols_grayscale, final_shape)
         
         # Unnormalize the processed image
         processed_image = unnormalize_binary_image(processed_image)

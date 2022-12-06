@@ -221,7 +221,10 @@ class Net(nn.Module):
         ## https://www.mathworks.com/help/deeplearning/ref/tansig.html
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
+<<<<<<< HEAD
         #tan = torch.sigmoid()
+=======
+>>>>>>> c92aabe37c4fd56e48985ed82a33404a22e0788c
         h = nn.functional.relu(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
         y = torch.sigmoid(self.fc2(h))
         
@@ -328,7 +331,7 @@ class Net(nn.Module):
                 X, y = X.to(device), y.to(device)
                 pred = self(X)
                 test_loss += loss_fn(pred.reshape(-1), y.float()).item()
-                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                correct += (pred.reshape(-1).round() == y).type(torch.float).sum().item()
         test_loss /= num_batches
         
         if show_accuracy:        
