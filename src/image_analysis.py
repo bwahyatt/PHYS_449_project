@@ -186,7 +186,6 @@ def rem_back(bin_img, grayscale_img): # Remove background from grayscale image
 def crop(img, shape):
     # img = array of the input image
     # shape = (int , int)
-    print(img.shape)
     crop = cv2.resize(img, dsize = shape)
     return crop 
 

@@ -22,9 +22,15 @@ from src.remove_rogue_files import list_dir
 def main():
     
     ## Maybe convert these to argparse later
-    processed_images_dir = 'processed_images'
-    hyperparams_path = './param/param.json'
-    ids_and_labels_path = 'ids_and_labels.csv'
+    class_mode = 'multi'
+    if class_mode == 'binary':
+        processed_images_dir = 'processed_images'
+        hyperparams_path = './param/binary_param.json'
+        ids_and_labels_path = 'ids_and_labels.csv'
+    elif class_mode == 'multi':
+        processed_images_dir = 'processed_images'
+        hyperparams_path = 'param/param.json'
+        ids_and_labels_path = 'specific_ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
     ## this path can be made a variable/command line argument/json file parameter/etc later
@@ -44,6 +50,8 @@ def main():
                                             ## to recreate paper, we will probably need to try all 3 author values?
     class_label_mapping = param['class_label_mapping']    
     num_class = len(class_label_mapping)
+    if num_class == 2:
+        num_class = 1
     
     ## Separate our testing and training data using a cutoff index
     ## index for the cutoff of our training vs test data
@@ -102,7 +110,11 @@ def main():
     ## NN stuff - cf. Workshop 2 / assignment 2
     model = Net(feature_size, hidden_nodes, num_class)
     optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
-    loss = nn.BCELoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+    if num_class == 1:
+        loss = nn.BCELoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+    else: 
+        loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+        
 
     train_loss_list = []    ## plot this after training
     test_loss_list = []    ## plot this after training

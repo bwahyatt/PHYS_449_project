@@ -214,8 +214,12 @@ class Net(nn.Module):
             authors use 2, 3, 5, and 7
         '''
         
+        self.feature_dim = feature_dim
+        self.hidden_nodes = hidden_nodes
+        self.num_classes = num_classes
+        
         self.fc1 = nn.Linear(feature_dim, hidden_nodes)            
-        self.fc2 = nn.Linear(hidden_nodes, 1)
+        self.fc2 = nn.Linear(hidden_nodes, num_classes)
         
     def forward(self, x):
         ## according to this:
@@ -223,8 +227,13 @@ class Net(nn.Module):
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
         #tan = torch.sigmoid()
-        h = nn.functional.relu(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
-        y = torch.sigmoid(self.fc2(h))
+        if self.num_classes != 1: # Multi-label classification functions
+            tan = nn.Tanh()
+            h = tan(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
+            y = self.fc2(h)
+        else: # Binary classification functions
+            h = nn.functional.relu(self.fc1(x)) 
+            y = torch.sigmoid(self.fc2(h))
         
         ## return y for now? 
         ## if we need e.g. softmax, CrossEntropyLoss will do it for us to this last linear output
@@ -270,7 +279,10 @@ class Net(nn.Module):
 
             # Compute prediction error
             pred = self(X)
-            loss = loss_fn(pred.reshape(-1), y.float())
+            if self.num_classes == 1:
+                loss = loss_fn(pred.reshape(-1), y.float())
+            else:
+                loss = loss_fn(pred, y)
 
             # Backpropagation
             optimizer.zero_grad()
@@ -328,8 +340,12 @@ class Net(nn.Module):
             for X, y in dataloader:
                 X, y = X.to(device), y.to(device)
                 pred = self(X)
-                test_loss += loss_fn(pred.reshape(-1), y.float()).item()
-                correct += (pred.reshape(-1).round() == y).type(torch.float).sum().item()
+                if self.num_classes == 1:
+                    test_loss += loss_fn(pred.reshape(-1), y.float()).item()
+                    correct += (pred.reshape(-1).round() == y).type(torch.float).sum().item()
+                else:
+                    test_loss += loss_fn(pred, y).item()
+                    correct += (pred.argmax(1) == y).type(torch.float).sum().item()
         test_loss /= num_batches
         
         if show_accuracy:        
