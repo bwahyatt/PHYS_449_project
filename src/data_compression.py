@@ -90,9 +90,12 @@ def mean_image_vec(path_to_images: str) -> NDArray:
     '''
 
     all_imgs_list = os.listdir(path_to_images)
+    if all_imgs_list[0] == '.DS_Store':
+        all_imgs_list.pop(0)
 
     ## get the size of the binary images (they should all be the same size)
         ## this fname string might be off.. 
+    
     dummy_img = cv2.imread(path_to_images+'/'+all_imgs_list[0], 0)
 
     ## just the 1D size of the processed images
