@@ -1,6 +1,6 @@
 {
     "optim": {
-        "epochs": 200,
+        "epochs": 1000,
         "learn_rate": 8e-4,
         "binary_threshold": 90
     },
@@ -11,7 +11,10 @@
         "train_end_index": 293
     },
     "class_label_mapping": {
-        "S": 0,
-        "E": 1
+        "Sa": 0,
+        "S": 1,
+        "Sc": 2,
+        "Sb": 3,
+        "E": 4
     }
 }
