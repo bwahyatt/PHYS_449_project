@@ -214,16 +214,15 @@ class Net(nn.Module):
         '''
         
         self.fc1 = nn.Linear(feature_dim, hidden_nodes)            
-        self.fc2 = nn.Linear(hidden_nodes, num_classes)
+        self.fc2 = nn.Linear(hidden_nodes, 1)
         
     def forward(self, x):
         ## according to this:
         ## https://www.mathworks.com/help/deeplearning/ref/tansig.html
         ## "tan sigmoid" activation is just tanh?
         ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
-        tan = nn.Sigmoid()
-        h = tan(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
-        y = self.fc2(h)
+        h = nn.functional.relu(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
+        y = torch.sigmoid(self.fc2(h))
         
         ## return y for now? 
         ## if we need e.g. softmax, CrossEntropyLoss will do it for us to this last linear output
@@ -269,7 +268,7 @@ class Net(nn.Module):
 
             # Compute prediction error
             pred = self(X)
-            loss = loss_fn(pred, y.reshape(-1))
+            loss = loss_fn(pred.reshape(-1), y.float())
 
             # Backpropagation
             optimizer.zero_grad()
@@ -327,8 +326,8 @@ class Net(nn.Module):
             for X, y in dataloader:
                 X, y = X.to(device), y.to(device)
                 pred = self(X)
-                test_loss += loss_fn(pred.reshape(-1), y).item()
-                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                test_loss += loss_fn(pred.reshape(-1), y.float()).item()
+                correct += (pred.reshape(-1).round() == y).type(torch.float).sum().item()
         test_loss /= num_batches
         
         if show_accuracy:        

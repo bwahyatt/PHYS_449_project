@@ -166,6 +166,7 @@ def rotate(image: NDArray, angle: float) -> NDArray:
     return output
 
 def rem_back(bin_img, grayscale_img): # Remove background from grayscale image
+    bin_img = bin_img.astype(int)
     blk_cols = [] 
     for i in range(bin_img.shape[1]):
         if (np.all(bin_img[:,i] == 0)):
