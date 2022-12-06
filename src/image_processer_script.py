@@ -33,7 +33,7 @@ def main():
     ## we should make a separate folder with all of the processed, binary images too (see below)
         ## see "processed_images"
 
-    with open('/Users/ahmedlahiouel/Desktop/4A/Physics 449/PHYS_449_project/param/param.json') as fp:
+    with open('param/param.json') as fp:
         params = json.load(fp)
         
     ## some number for assigning binary image pixel values
