@@ -28,19 +28,11 @@ def flattener(path_to_image: str) -> NDArray:
 
     img_input = cv2.imread(path_to_image, 0)
         ## the 0 argument reads the image as black and white
-            ## => 2D array, no RGB channels (?)
-        ## might end up being redundant due to binary image processing
     img_array = np.array(img_input).astype(np.float32)
-    #cv2.imshow("display",img_array)
 
     img_array_flat = img_array.flatten()
-    ## note: np.ndarray.flatten (by default) will basically concatenate
-    ## the array's ROWS together, from top to bottom
-        ## there are arguments you can give it to flatten it differently,
-        ## e.g. by columns
-        ## I think it should be fine either way (?)
         
-    ## adding the binary normalization here
+    ## adding the binary normalization
     return normalize_binary_image(img_array_flat)
 
 def unflattener(img_arr: NDArray, new_shape: Tuple = (128,128)) -> NDArray:
@@ -95,11 +87,9 @@ def mean_image_vec(path_to_images: str) -> NDArray:
         all_imgs_list.pop(0)
 
     ## get the size of the binary images (they should all be the same size)
-        ## this fname string might be off.. 
-    
     dummy_img = cv2.imread(path_to_images+'/'+all_imgs_list[0], 0)
 
-    ## just the 1D size of the processed images
+    ## 1D size of the processed images
     img_size = np.size(np.array(dummy_img).flatten())
     mean_img = np.zeros(img_size,float)
 
@@ -112,8 +102,6 @@ def mean_image_vec(path_to_images: str) -> NDArray:
         mean_img += flattener(full_fname)
 
     mean_img /= len(all_imgs_list)
-    ## careful, "ints" are going to be rounded off.. and everything is 0 or 1
-    ## try having floats in "mean_img" for now
 
     ## the average flattened image vector of the whole processed dataset:
     return mean_img 
@@ -131,21 +119,18 @@ def matrix_of_thetas(mean_img: NDArray, path_to_images: str) -> NDArray:
         NDArray: The matrix of thetas
     '''
     
-    ## list of all the processed image names, like the above function
+    ## list of all the processed image names
     all_imgs_list = list_dir(path_to_images, '.DS_Store')
 
     ## this matrix has columns that are "theta" vectors
         ## num rows = size of these flattened image vectors
         ## num columns = number of images in dataset
-    ## dtype also float? 
     A_matrix = np.zeros((np.size(mean_img),len(all_imgs_list)),float)
 
     for m in range(len(all_imgs_list)):
         ## path to individual (processed) image file
         mth_img_path = path_to_images+'/'+all_imgs_list[m]         
         theta_m = flattener(mth_img_path) - mean_img
-
-        ## might end up needing some "theta_m transpose" on RHS instead? (probably not) 
         A_matrix[:,m] += theta_m
         
     return A_matrix
@@ -168,7 +153,7 @@ def big_cov_matrix(mean_img: NDArray, path_to_images: str) -> NDArray:
     A_matrix = matrix_of_thetas(mean_img, path_to_images)
     A_T = np.transpose(A_matrix)
 
-    return np.dot(A_matrix, A_T) ## this should be the covariance matrix
+    return np.dot(A_matrix, A_T)
     
 def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str = 'sklearn', vprinter: VerbosityPrinter = None, **kwargs) -> NDArray:
     '''
@@ -202,7 +187,6 @@ def mat_of_thetas_to_pcs(mat_of_thetas: NDArray, n_components: int, method: str 
     vprinter.vprint(f"{method} execution time = {end_time-start_time} sec", 1)
     return result
 
-## see: equation 9 of paper
 def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -> NDArray:
     '''
     Args (all arrays):
@@ -218,7 +202,6 @@ def feature_extract(pca_matrix: NDArray, flat_img: NDArray, mean_img: NDArray) -
     
     PCsT = np.transpose(pca_matrix)
     proj = np.dot(PCsT, flat_img-mean_img)
-    #proj /= la.norm(proj)
     return proj
     
 def uncompress_img(PC_mat: NDArray, feature_vec: NDArray, mean_img_arr: NDArray, display_img: bool = False) -> NDArray:
@@ -262,12 +245,6 @@ if __name__ == '__main__':
     mean_vector = mean_image_vec(proc_path)   
     thetas_mat = matrix_of_thetas(mean_vector, proc_path) 
     PCA_matrix = mat_of_thetas_to_pcs(thetas_mat, feature_size, 'sklearn')
-    
-    # mean_vector = mean_image_vec(proc_path)   
-    # processed_fname = f'{proc_path}/1237661968495935570.jpg'
-    # current_flat_img = flattener(processed_fname)
-    # current_feature_vec = feature_extract(PCA_matrix, current_flat_img, mean_vector)
-    # uncomp_img = uncompress_img(PCA_matrix, current_feature_vec, mean_vector, display_img=True)
     
     out_path = 'sandbox/outputs'
     save_eigengalaxies(PCA_matrix, out_path)

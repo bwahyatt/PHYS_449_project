@@ -1,5 +1,3 @@
-## define the NN class here
-
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
@@ -152,22 +150,12 @@ class GalaxiesDataset(Dataset):
             feature_array[k,:] += current_feature_vec
         self.vprinter.vprint('\n', 1)
             
-        # And finally, label each image
-        class_labels = np.zeros(len(processed_imgs_list), dtype=np.int64) ## according to my (Ben) A2, pytorch is expecting int64 for loss function
+        # label each image
+        class_labels = np.zeros(len(processed_imgs_list), dtype=np.int64)
         for k in range(np.size(class_labels)):
             
             ## let spiral galaxies have a label = 0
             ## let elliptical galaxies have label = 1
-            
-            ## WE NEED: some set of INDECIES corresponding to each class, to give as a "label" for our loss function
-            ## looks like 'ids_and_labels' just has S and E classes at the moment
-            ## this is an ad hoc bit of code for now, should be more generalized in principle
-            ## e.g. if the "number of classes" hyperparameter is made > 2
-            ## I invite anyone who has a better idea on how to do this to tweak it 
-            ## but if we are just doing S and E, need something like:
-            
-            ## is this how indexing in Pandas works?
-            ## i.e. will it recognize that underscore even though the original csv column is "Simple Classification" with a space?
             clasification = ids_and_labels[self._class_col][int(processed_imgs_list[k][:-4])]
             try:
                 class_labels[k] = self._class_label_mapping[clasification]
@@ -225,21 +213,13 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(hidden_nodes, num_classes)
         
     def forward(self, x):
-        ## according to this:
-        ## https://www.mathworks.com/help/deeplearning/ref/tansig.html
-        ## "tan sigmoid" activation is just tanh?
-        ## kind of makes sense, tanh function has similar behaviour to sigmoid, probably just weird '04 terminology
-        #tan = torch.sigmoid()
         if self.num_classes != 1: # Multi-label classification functions
             tan = nn.Tanh()
-            h = tan(self.fc1(x)) ## Setting up Tanh and using it on data have to go on separate lines - otherwise an error occurs
+            h = tan(self.fc1(x))
             y = self.fc2(h)
         else: # Binary classification functions
             h = nn.functional.relu(self.fc1(x)) 
             y = torch.sigmoid(self.fc2(h))
-        
-        ## return y for now? 
-        ## if we need e.g. softmax, CrossEntropyLoss will do it for us to this last linear output
         return y
     
     def train_model(self, 
@@ -380,8 +360,6 @@ class Net(nn.Module):
         
         return test_loss
         
-    ## copying this from workshop 2 as well
-    ## e.g. if we wanna change number of feature vector elements/hidden layers like author, we can use this same outline
     def reset(self):
         self.fc1.reset_parameters()
         self.fc2.reset_parameters()

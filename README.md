@@ -4,14 +4,10 @@ Repository for our PHYS 449 group project
 
 ## Dataset format
 
-Our dataset should have a folder with all the images, and a txt/csv file with these rows:
+Our dataset consists of a folder with all of the raw images (raw_images) and two CSV files:
 
-- object name (i.e. NGC No.),
-- full classification (look up on ned.ipac site),
-- "binary" classication,
-- "trinary" classification, etc.
-
-I.e. the authors use multiple numbers of classification outputs. Keep the "full" morphology output so we can go back and decide which/how many classifications we want for the other rows
+- ids_and_labels.csv contains the object IDs, the binary classifications, and the full classifications 
+- specific_ids_and_labels.csv contains the object IDs, the multiclass classifications, and the full classifications
 
 ## Project Dependencies
 

@@ -1,7 +1,3 @@
-## PRELIMINARY main.py script
-## i.e. just a skeleton of what it could/should look like
-## this script will be run after the raw/processed dataset generation
-
 import torch
 from torch import nn
 import torch.optim as optim
@@ -15,13 +11,12 @@ import shutil
 from tqdm import tqdm
 
 from src.neural_net import Net, GalaxiesDataset
-import src.data_compression as dc  ## I think we need all of them 
+import src.data_compression as dc 
 from src.verbosity_printer import VerbosityPrinter
 from src.remove_rogue_files import list_dir
 
 def main():
     
-    ## Maybe convert these to argparse later
     class_mode = 'multi'
     if class_mode == 'binary':
         processed_images_dir = 'grayscale_images'
@@ -33,21 +28,16 @@ def main():
         ids_and_labels_path = 'specific_ids_and_labels.csv'
     system_verbosity = 2 # 2 = debug mode; 0 = performance report mode only; 1 = something in between
     
-    ## this path can be made a variable/command line argument/json file parameter/etc later
-    ## (or not)
-    # processed_imgs_list = list_dir(processed_images_dir, '.DS_Store')
 
     ## Import hyperparameters from .json
-    with open(hyperparams_path) as paramfile: ## could make the path a command line argument
+    with open(hyperparams_path) as paramfile:
         param = json.load(paramfile)
 
-    ## added a couple others here/in the json
     batch = param['model']['batch']
     epochs = param['optim']['epochs']
     learn_rate = param['optim']['learn_rate']
-    hidden_nodes = param['model']['hidden_nodes'] ## or whatever "third of the input size" the authors use
-    feature_size = param['model']['feature_size'] ## or 13 or 25 or whatever we want. But, it is something we have to pick by hand
-                                            ## to recreate paper, we will probably need to try all 3 author values?
+    hidden_nodes = param['model']['hidden_nodes'] 
+    feature_size = param['model']['feature_size'] 
     class_label_mapping = param['class_label_mapping']    
     num_class = len(class_label_mapping)
     if num_class == 2:
@@ -56,7 +46,6 @@ def main():
     ## Separate our testing and training data using a cutoff index
     ## index for the cutoff of our training vs test data
     ## e.g. training data (file names) = processed_imgs[0:train_end_index], test data = processed_imgs[train_end_index:]
-    ## this index can be made a "   "   "   "  "   "   "   " " " " " " " " " " " " " " 
     
     train_dir = f'{processed_images_dir}/train'
     test_dir = f'{processed_images_dir}/test'
@@ -76,7 +65,7 @@ def main():
     shutil.copytree(processed_images_dir, all_data_dir, ignore = shutil.ignore_patterns('train*', 'test*', 'all*'), dirs_exist_ok = True)
     
     # Partition our images into a training dataset and a testing dataset
-    train_end_index = param['model']['train_end_index'] ## moved this to param.json
+    train_end_index = param['model']['train_end_index']
     processed_imgs_list = [f for f in list_dir(processed_images_dir, '.DS_Store') if os.path.isfile(os.path.join(processed_images_dir, f))]
     for i, fname in enumerate(processed_imgs_list):
         if i <= train_end_index:
@@ -85,8 +74,6 @@ def main():
             shutil.move(f'{processed_images_dir}/{fname}', f'{test_dir}/{fname}')
             
         
-    # ## read in our labels
-    # ids_and_labels = pd.read_csv(ids_and_labels_path) 
     
     # Initialize the verbosity printer
     vprinter = VerbosityPrinter(system_verbosity)
@@ -109,13 +96,13 @@ def main():
                                     vprinter = vprinter,                            
                                     train_dataset = train_dataset)
             
-    ## NN stuff - cf. Workshop 2 / assignment 2
+    ## Neural network stuff 
     model = Net(feature_size, hidden_nodes, num_class)
     optimizer = optim.SGD(model.parameters(), lr=learn_rate) 
     if num_class == 1:
-        loss = nn.BCELoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+        loss = nn.BCELoss()                       
     else: 
-        loss = nn.CrossEntropyLoss()                        ## or, if we are only doing 2 classes, could use BCEloss?
+        loss = nn.CrossEntropyLoss()                  
         
 
     train_loss_list = []    ## plot this after training
@@ -134,8 +121,7 @@ def main():
         train_loss_list.append(train_loss_val)
         test_loss_list.append(test_loss_val)
     
-    ## Finally, test data
-    ## can do it all as one big batch 
+    ## test data
     test_loss = model.test(galaxies_data = test_dataset,
                             loss_fn = loss,
                             vprinter = vprinter,
@@ -143,7 +129,6 @@ def main():
                             show_accuracy = True,
                             confusion_matrix_out_path = 'confusion_matrix.pdf'
                             )    
-    # test_dataset.save_eigengalaxies('sandbox/outputs')
     vprinter.vprint(f'TEST DATA LOSS: {test_loss}')
     
     ## training loss plot
