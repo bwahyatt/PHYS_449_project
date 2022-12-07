@@ -13,7 +13,7 @@ import sys
 sys.path.append('src')
 from image_analysis import normalize_binary_image, unnormalize_binary_image
 from verbosity_printer import VerbosityPrinter
-from src.remove_rogue_files import list_dir
+from remove_rogue_files import list_dir
 
 def flattener(path_to_image: str) -> NDArray:
     '''

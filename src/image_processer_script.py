@@ -12,11 +12,12 @@ from verbosity_printer import VerbosityPrinter
 ## i.e. it is not currently runnable, but highlights how some of these functions from src folder could fit together
 ## should go through raw images and save the binary
 
-# sys.path.append('src')
+import sys
+sys.path.append('src')
 
 from image_analysis import binary_assign, centre_row_col, small_cov_matrix, grayscale_img, rem_back
 from image_analysis import theta_angle, rotate, crop, normalize_binary_image, unnormalize_binary_image
-from src.remove_rogue_files import list_dir
+from remove_rogue_files import list_dir
 
 def import_raw_imgs(pdir: str) -> Tuple[str]:
     PATH_TO_RAW_IMAGES = f"{pdir}/raw_images/"    ## relative should work if this script is in 'src'
@@ -73,11 +74,11 @@ def main():
         
         # Unnormalize the processed image
         processed_image = unnormalize_binary_image(processed_image)
-        processed_image = processed_image.astype(int)
+        # processed_image = processed_image.astype(int)
         
         ## dropping the '.jpg' from the string, looks like cv2 takes care of it
         ## our processed images end with .jpg.jpg
-        cv2.imwrite(f'{pdir}/processed_images/{raw_img_names[n]}', processed_image)
+        cv2.imwrite(f'{pdir}/grayscale_images/{raw_img_names[n]}', processed_image)
         ## rotate, rescale, save array as a processed image to new folder
 
 if __name__ == '__main__':
