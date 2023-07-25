@@ -1,6 +1,10 @@
 # PHYS_449_project
 
-Repository for our PHYS 449 group project
+Repository for our PHYS 449 group project.
+
+The purpose of this project was to replicate the methods and results from this paper: https://doi.org/10.1111/j.1365-2966.2004.07442.x
+
+The paper explores how astronomers can use machine learning to aid in galaxy classification, a time consuming task that would greatly benefit the astronomy community if it could be automated. 
 
 ## Dataset format
 
